@@ -1,0 +1,70 @@
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+}
+
+export interface FamilyMember {
+  name: string;
+  relationship?: string;
+  age?: number;
+}
+
+export interface Client {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  email?: string;
+  address: Address;
+  familyMembers: FamilyMember[];
+  numberInFamily: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Visit {
+  id: string;
+  clientId: string;
+  date: string;
+  dayOfWeek: 'Monday' | 'Friday';
+  itemsReceived?: string;
+  servedBy?: string;
+  notes?: string;
+  checkedInAt: string; // ISO datetime for the timestamp display
+}
+
+export interface Volunteer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  email?: string;
+  notes?: string;
+  recurringDays?: PantryDay[];
+  createdAt: string;
+}
+
+export interface VolunteerShift {
+  id: string;
+  volunteerId: string;
+  date: string;
+  dayOfWeek: 'Monday' | 'Friday';
+  hoursWorked?: number;
+  role?: string;
+  notes?: string;
+}
+
+export interface VolunteerSignup {
+  id: string;
+  volunteerId: string;
+  date: string;        // ISO date for the specific session
+  dayOfWeek: PantryDay;
+  role?: string;
+  status: 'signed-up' | 'cancelled';
+  createdAt: string;
+}
+
+export type PantryDay = 'Monday' | 'Friday';
