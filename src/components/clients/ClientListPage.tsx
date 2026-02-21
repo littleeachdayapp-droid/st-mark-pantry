@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
-import { Search, UserPlus, QrCode } from 'lucide-react';
+import { Search, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -38,12 +38,6 @@ export function ClientListPage() {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link to="/clients/cards">
-              <QrCode className="size-4" />
-              QR Cards
-            </Link>
-          </Button>
           <Button asChild>
             <Link to="/clients/new">
               <UserPlus className="size-4" />

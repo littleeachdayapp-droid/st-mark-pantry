@@ -19,7 +19,6 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { searchClients } from '@/utils/search';
 import { getTodayISO, formatDate } from '@/utils/dateHelpers';
 import TodaysList from './TodaysList';
-import { QRScanner } from './QRScanner';
 import { ItemsReceivedDialog } from './ItemsReceivedDialog';
 import type { Client, PantryDay, Visit } from '@/types';
 
@@ -321,13 +320,6 @@ export function CheckInPage() {
           </Card>
         )}
       </div>
-
-      {/* ---- QR Scanner ---- */}
-      <QRScanner
-        selectedDay={selectedDay}
-        selectedDate={selectedDate}
-        onCheckIn={handleCheckIn}
-      />
 
       {/* ---- Today's visitors ---- */}
       <Card>

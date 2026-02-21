@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
-import { ArrowLeft, Phone, Mail, MapPin, Pencil, Trash2, Users, QrCode, AlertTriangle, Snowflake } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MapPin, Pencil, Trash2, Users, AlertTriangle, Snowflake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +19,6 @@ import {
 } from '@/components/ui/dialog';
 import { useSettings } from '@/contexts/SettingsContext';
 import { formatDate, getTodayISO } from '@/utils/dateHelpers';
-import { ClientQRCard } from './ClientQRCard';
 
 export function ClientDetail() {
   const { settings } = useSettings();
@@ -27,7 +26,7 @@ export function ClientDetail() {
   const navigate = useNavigate();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [showQR, setShowQR] = useState(false);
+
 
   const today = getTodayISO();
   const monthStart = today.substring(0, 7) + '-01';
@@ -204,19 +203,6 @@ export function ClientDetail() {
             {client.notes}
           </div>
         )}
-      </div>
-
-      {/* QR Code Card */}
-      <div className="space-y-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowQR(!showQR)}
-        >
-          <QrCode className="size-4" />
-          {showQR ? 'Hide QR Card' : 'Show QR Card'}
-        </Button>
-        {showQR && <ClientQRCard client={client} />}
       </div>
 
       <Separator />
