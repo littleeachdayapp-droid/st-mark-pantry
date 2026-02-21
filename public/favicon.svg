@@ -1,4 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="6" fill="#2D5016"/>
-  <text x="16" y="23" text-anchor="middle" font-size="20" font-family="system-ui" fill="white">P</text>
+  <!-- Simplified bag -->
+  <path d="M9 13 h14 l1.5 13 a1 1 0 0 1 -1 1 H9.5 a1 1 0 0 1 -1 -1 Z"
+        fill="none" stroke="#FEFCE8" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M12.5 13 v-2.5 a3.5 3.5 0 0 1 7 0 v2.5"
+        fill="none" stroke="#FEFCE8" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Tiny heart -->
+  <path d="M16 23 C16 23 19.5 19.5 19.5 17.8 A2 2 0 0 0 16 16.8 A2 2 0 0 0 12.5 17.8 C12.5 19.5 16 23 16 23 Z"
+        fill="#FEFCE8"/>
 </svg>
