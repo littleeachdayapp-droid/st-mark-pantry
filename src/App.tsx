@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { DashboardPage } from '@/components/dashboard/DashboardPage'
@@ -16,8 +17,60 @@ import { ReportsPage } from '@/components/reports/ReportsPage'
 import { InactiveClientsPage } from '@/components/reports/InactiveClientsPage'
 import { SettingsPage } from '@/components/settings/SettingsPage'
 
+const PASS = 'stmark'
+const STORAGE_KEY = 'pantry-auth'
+
+function LoginGate({ children }: { children: React.ReactNode }) {
+  const [authed, setAuthed] = useState(() => localStorage.getItem(STORAGE_KEY) === 'true')
+  const [value, setValue] = useState('')
+  const [error, setError] = useState(false)
+
+  if (authed) return <>{children}</>
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (value.trim().toLowerCase() === PASS) {
+      localStorage.setItem(STORAGE_KEY, 'true')
+      setAuthed(true)
+    } else {
+      setError(true)
+    }
+  }
+
+  return (
+    <div className="flex min-h-svh items-center justify-center bg-muted p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-xs space-y-4 rounded-xl bg-card p-6 shadow-lg"
+      >
+        <div className="text-center">
+          <span className="text-3xl">🌾</span>
+          <h1 className="mt-2 text-lg font-bold">St. Mark Food Pantry</h1>
+          <p className="text-sm text-muted-foreground">Enter password to continue</p>
+        </div>
+        <input
+          type="password"
+          value={value}
+          onChange={(e) => { setValue(e.target.value); setError(false) }}
+          placeholder="Password"
+          autoFocus
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        {error && <p className="text-sm text-destructive">Incorrect password</p>}
+        <button
+          type="submit"
+          className="w-full rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          Enter
+        </button>
+      </form>
+    </div>
+  )
+}
+
 export function App() {
   return (
+    <LoginGate>
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
@@ -39,5 +92,6 @@ export function App() {
         <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>
+    </LoginGate>
   )
 }
