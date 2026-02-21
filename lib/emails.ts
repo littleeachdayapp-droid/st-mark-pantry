@@ -92,6 +92,38 @@ export function reminderEmail(
   };
 }
 
+export function publicConfirmationEmail(
+  firstName: string,
+  dates: { date: string; dayOfWeek: string }[],
+  role?: string
+): { subject: string; html: string } {
+  const count = dates.length;
+  const dateListHtml = dates
+    .map((d) => {
+      const nice = formatDateNice(d.date, d.dayOfWeek);
+      return `<li style="padding:4px 0;color:#166534;font-weight:600;">${nice}</li>`;
+    })
+    .join('');
+
+  const roleLine = role
+    ? `<p style="margin:8px 0 0;color:#374151;font-size:14px;">Preferred role: <strong>${role}</strong></p>`
+    : '';
+
+  return {
+    subject: `You're signed up to volunteer (${count} session${count === 1 ? '' : 's'})`,
+    html: baseTemplate('Signup Confirmation', `
+      <h2 style="margin:0 0 12px;color:#1f2937;font-size:20px;">You're signed up!</h2>
+      <p style="margin:0;color:#374151;font-size:14px;">Hi ${firstName},</p>
+      <p style="margin:8px 0 0;color:#374151;font-size:14px;">Thank you for signing up to volunteer at the food pantry. Here are your upcoming sessions:</p>
+      <ul style="list-style:none;padding:0;margin:12px 0;padding:12px 16px;background-color:#f0fdf4;border-radius:6px;">
+        ${dateListHtml}
+      </ul>
+      ${roleLine}
+      <p style="margin:16px 0 0;color:#374151;font-size:14px;">We look forward to seeing you there!</p>
+    `),
+  };
+}
+
 export function cancellationEmail(
   firstName: string,
   date: string,

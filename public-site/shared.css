@@ -1,0 +1,501 @@
+/* ============================================
+   St. Mark Legacy Food Pantry — Shared Styles
+   ============================================ */
+
+:root {
+  --warm-cream: #FDF8F3;
+  --deep-green: #2D5A47;
+  --soft-green: #4A7C67;
+  --golden: #D4A853;
+  --golden-light: #F5E6C8;
+  --text-dark: #2C2C2C;
+  --text-muted: #5A5A5A;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Source Sans 3', Georgia, serif;
+  background-color: var(--warm-cream);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* ---- Navbar ---- */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--deep-green);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 56px;
+}
+
+.navbar-brand {
+  color: white;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+}
+
+.navbar-links a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.navbar-links a:hover,
+.navbar-links a.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: white;
+  margin: 5px 0;
+  border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 600px) {
+  .hamburger {
+    display: block;
+  }
+
+  .navbar-links {
+    display: none;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: var(--deep-green);
+    flex-direction: column;
+    padding: 0.5rem 1rem 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .navbar-links.open {
+    display: flex;
+  }
+
+  .navbar-links a {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* ---- Hero ---- */
+.hero {
+  background: var(--deep-green);
+  color: white;
+  text-align: center;
+  padding: 2.5rem 1.5rem 3.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(212, 168, 83, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero .leaf-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.02em;
+}
+
+.hero .tagline {
+  font-size: 1.05rem;
+  opacity: 0.9;
+}
+
+/* ---- Main ---- */
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ---- Section headings ---- */
+h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--deep-green);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* ---- Hours Section ---- */
+.hours-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2.5rem;
+  margin: -2rem auto 2.5rem;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 4px 20px rgba(45, 90, 71, 0.1);
+  border: 1px solid rgba(45, 90, 71, 0.08);
+  animation: fadeUp 0.6s ease-out;
+}
+
+.hours-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.hour-card {
+  background: var(--golden-light);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  border-left: 4px solid var(--golden);
+}
+
+.hour-card .day {
+  font-weight: 600;
+  color: var(--deep-green);
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.hour-card .time {
+  color: var(--text-dark);
+  font-size: 1.05rem;
+}
+
+.hour-card .time-note {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.location {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(45, 90, 71, 0.05);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.location strong {
+  color: var(--deep-green);
+}
+
+.note {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(45, 90, 71, 0.2);
+  margin-top: 1rem;
+}
+
+/* ---- CTA Cards ---- */
+.cta-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.cta-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(45, 90, 71, 0.08);
+  border: 1px solid rgba(45, 90, 71, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cta-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(45, 90, 71, 0.15);
+}
+
+.cta-card h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--deep-green);
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.cta-card p {
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.cta-card .cta-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-block;
+  background: var(--deep-green);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.8rem;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn:hover {
+  background: var(--soft-green);
+  color: white;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--deep-green);
+  border: 2px solid var(--deep-green);
+}
+
+.btn-outline:hover {
+  background: var(--deep-green);
+  color: white;
+}
+
+/* ---- Form Card ---- */
+.form-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2.5rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 2px 12px rgba(45, 90, 71, 0.08);
+  border: 1px solid rgba(45, 90, 71, 0.08);
+  animation: fadeUp 0.6s ease-out;
+}
+
+.form-card h2 {
+  text-align: left;
+  margin-bottom: 0.5rem;
+}
+
+.form-card .form-desc {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+label {
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(45, 90, 71, 0.2);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--warm-cream);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--soft-green);
+  box-shadow: 0 0 0 3px rgba(74, 124, 103, 0.15);
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.field-error {
+  color: #b91c1c;
+  font-size: 0.8rem;
+  margin-top: 0.15rem;
+}
+
+/* ---- Footer ---- */
+footer {
+  background: var(--deep-green);
+  color: white;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  margin-top: 2rem;
+}
+
+footer p {
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+footer a {
+  color: var(--golden-light);
+}
+
+/* ---- Success Banner ---- */
+.success-banner {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.success-banner h3 {
+  color: #166534;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.success-banner p {
+  color: #15803d;
+  font-size: 0.95rem;
+}
+
+.success-banner .date-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.success-banner .date-list li {
+  padding: 0.4rem 0;
+  color: #166534;
+  font-weight: 600;
+}
+
+/* ---- Animations ---- */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cta-card:nth-child(1) { animation: fadeUp 0.6s ease-out 0.1s both; }
+.cta-card:nth-child(2) { animation: fadeUp 0.6s ease-out 0.2s both; }
+
+/* ---- Responsive ---- */
+@media (max-width: 600px) {
+  .hero {
+    padding: 2rem 1rem 2.5rem;
+  }
+
+  .hours-section, .form-card {
+    padding: 1.5rem;
+  }
+
+  .cta-section {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

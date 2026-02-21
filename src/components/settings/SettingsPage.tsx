@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Download, Upload, FileSpreadsheet, Info, Package, Bell, CloudUpload } from 'lucide-react'
+import { Download, Upload, FileSpreadsheet, Info, Package, Bell, CloudUpload, CloudDownload } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { db } from '@/db/database'
 import { useSettings } from '@/contexts/SettingsContext'
@@ -22,6 +22,7 @@ export function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [importing, setImporting] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const [syncingDown, setSyncingDown] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const showMessage = (type: 'success' | 'error', text: string) => {
@@ -120,6 +121,139 @@ export function SettingsPage() {
       showMessage('error', 'Failed to sync volunteers.')
     } finally {
       setSyncing(false)
+    }
+  }
+
+  const syncFromCloud = async () => {
+    setSyncingDown(true)
+    try {
+      const lastSync = localStorage.getItem('lastCloudSync') || undefined
+      const url = lastSync
+        ? `/api/public/sync-down?since=${encodeURIComponent(lastSync)}`
+        : '/api/public/sync-down'
+
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('Failed to fetch from cloud')
+      const data = await res.json() as {
+        ok: boolean
+        volunteers: Array<{
+          id: string
+          first_name: string
+          last_name: string
+          email: string | null
+          phone: string | null
+          recurring_days: string[]
+          recurring_slots: string[]
+        }>
+        signups: Array<{
+          id: string
+          volunteer_id: string
+          date: string
+          day_of_week: string
+          role: string | null
+          status: string
+          created_at: string
+        }>
+        syncedAt: string
+      }
+
+      if (!data.ok) throw new Error('Sync failed')
+
+      let newVolunteers = 0
+      let updatedVolunteers = 0
+      let newSignups = 0
+
+      // Build ID mapping: Supabase ID → local ID (for email-matched volunteers)
+      const idMap: Record<string, string> = {}
+
+      // Process volunteers
+      for (const sv of data.volunteers) {
+        // Try to find by ID first
+        const existingById = await db.volunteers.get(sv.id)
+        if (existingById) {
+          // Update existing
+          await db.volunteers.update(sv.id, {
+            firstName: sv.first_name,
+            lastName: sv.last_name,
+            email: sv.email || undefined,
+            phone: sv.phone || undefined,
+            recurringDays: sv.recurring_days as import('@/types').PantryDay[],
+            recurringSlots: sv.recurring_slots,
+          })
+          idMap[sv.id] = sv.id
+          updatedVolunteers++
+          continue
+        }
+
+        // Try to find by email (case-insensitive)
+        if (sv.email) {
+          const allVolunteers = await db.volunteers.toArray()
+          const emailMatch = allVolunteers.find(
+            (v) => v.email && v.email.toLowerCase() === sv.email!.toLowerCase()
+          )
+          if (emailMatch) {
+            // Update existing local volunteer, map Supabase ID → local ID
+            await db.volunteers.update(emailMatch.id, {
+              firstName: sv.first_name,
+              lastName: sv.last_name,
+              phone: sv.phone || undefined,
+              recurringDays: sv.recurring_days as import('@/types').PantryDay[],
+              recurringSlots: sv.recurring_slots,
+            })
+            idMap[sv.id] = emailMatch.id
+            updatedVolunteers++
+            continue
+          }
+        }
+
+        // New volunteer — create locally with Supabase ID
+        await db.volunteers.add({
+          id: sv.id,
+          firstName: sv.first_name,
+          lastName: sv.last_name,
+          email: sv.email || undefined,
+          phone: sv.phone || undefined,
+          recurringDays: sv.recurring_days as import('@/types').PantryDay[],
+          recurringSlots: sv.recurring_slots,
+          createdAt: new Date().toISOString(),
+        })
+        idMap[sv.id] = sv.id
+        newVolunteers++
+      }
+
+      // Process signups
+      for (const ss of data.signups) {
+        const localVolunteerId = idMap[ss.volunteer_id] || ss.volunteer_id
+
+        // Check for duplicate by volunteerId+date compound index
+        const existing = await db.volunteerSignups
+          .where('[volunteerId+date]')
+          .equals([localVolunteerId, ss.date])
+          .first()
+
+        if (existing) continue
+
+        await db.volunteerSignups.add({
+          id: ss.id,
+          volunteerId: localVolunteerId,
+          date: ss.date,
+          dayOfWeek: ss.day_of_week as import('@/types').PantryDay,
+          role: ss.role || undefined,
+          status: ss.status as 'signed-up' | 'cancelled',
+          createdAt: ss.created_at,
+        })
+        newSignups++
+      }
+
+      localStorage.setItem('lastCloudSync', data.syncedAt)
+      showMessage(
+        'success',
+        `Synced from cloud: ${newVolunteers} new volunteers, ${updatedVolunteers} updated, ${newSignups} new signups.`
+      )
+    } catch (err) {
+      showMessage('error', err instanceof Error ? err.message : 'Failed to sync from cloud.')
+    } finally {
+      setSyncingDown(false)
     }
   }
 
@@ -240,15 +374,26 @@ export function SettingsPage() {
             />
           </div>
           {settings.notificationsEnabled && (
-            <Button
-              onClick={syncAllVolunteers}
-              variant="outline"
-              className="w-full justify-start"
-              disabled={syncing}
-            >
-              <CloudUpload className="size-4" />
-              {syncing ? 'Syncing...' : 'Sync All Volunteers to Cloud'}
-            </Button>
+            <>
+              <Button
+                onClick={syncAllVolunteers}
+                variant="outline"
+                className="w-full justify-start"
+                disabled={syncing}
+              >
+                <CloudUpload className="size-4" />
+                {syncing ? 'Syncing...' : 'Sync All Volunteers to Cloud'}
+              </Button>
+              <Button
+                onClick={syncFromCloud}
+                variant="outline"
+                className="w-full justify-start"
+                disabled={syncingDown}
+              >
+                <CloudDownload className="size-4" />
+                {syncingDown ? 'Syncing...' : 'Sync from Cloud'}
+              </Button>
+            </>
           )}
         </CardContent>
       </Card>
