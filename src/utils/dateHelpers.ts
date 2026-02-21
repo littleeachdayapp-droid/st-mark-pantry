@@ -24,7 +24,7 @@ export function getTodayDayOfWeek(): string {
 export function isPantryDay(date?: string): boolean {
   const d = date ? parseLocalDate(date) : new Date();
   const dayName = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(d);
-  return dayName === 'Monday' || dayName === 'Friday';
+  return dayName === 'Monday' || dayName === 'Friday' || dayName === 'Saturday';
 }
 
 /**
@@ -38,20 +38,30 @@ export function getDefaultPantryDay(): PantryDay {
 
   if (dayOfWeek === 1) return 'Monday';
   if (dayOfWeek === 5) return 'Friday';
+  if (dayOfWeek === 6) return 'Saturday';
 
-  // Calculate distance to Monday (1) and Friday (5)
-  const distToMonday = Math.min(
-    Math.abs(dayOfWeek - 1),
-    Math.abs(dayOfWeek - 1 + 7),
-    Math.abs(dayOfWeek - 1 - 7)
-  );
-  const distToFriday = Math.min(
-    Math.abs(dayOfWeek - 5),
-    Math.abs(dayOfWeek - 5 + 7),
-    Math.abs(dayOfWeek - 5 - 7)
-  );
+  // Calculate distance to each pantry day
+  const days: { day: PantryDay; num: number }[] = [
+    { day: 'Monday', num: 1 },
+    { day: 'Friday', num: 5 },
+    { day: 'Saturday', num: 6 },
+  ];
 
-  return distToMonday <= distToFriday ? 'Monday' : 'Friday';
+  let closest: PantryDay = 'Monday';
+  let minDist = Infinity;
+  for (const { day, num } of days) {
+    const dist = Math.min(
+      Math.abs(dayOfWeek - num),
+      Math.abs(dayOfWeek - num + 7),
+      Math.abs(dayOfWeek - num - 7)
+    );
+    if (dist < minDist) {
+      minDist = dist;
+      closest = day;
+    }
+  }
+
+  return closest;
 }
 
 /**

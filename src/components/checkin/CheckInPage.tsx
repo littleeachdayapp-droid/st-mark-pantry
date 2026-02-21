@@ -37,11 +37,12 @@ function formatFullDate(date: Date): string {
   }).format(date);
 }
 
-/** Detect whether today is Monday (1) or Friday (5). Returns the day or null. */
+/** Detect whether today is a pantry day. Returns the day or null. */
 function detectPantryDay(): PantryDay | null {
   const dow = new Date().getDay();
   if (dow === 1) return 'Monday';
   if (dow === 5) return 'Friday';
+  if (dow === 6) return 'Saturday';
   return null;
 }
 
@@ -206,7 +207,7 @@ export function CheckInPage() {
 
         {/* Day toggle pills */}
         <div className="flex items-center justify-center gap-2">
-          {(['Monday', 'Friday'] as const).map((day) => (
+          {(['Monday', 'Friday', 'Saturday'] as const).map((day) => (
             <button
               key={day}
               type="button"
@@ -223,7 +224,7 @@ export function CheckInPage() {
         </div>
         {!selectedDay && (
           <p className="text-sm text-destructive font-medium">
-            Please select Monday or Friday to begin
+            Please select a day to begin
           </p>
         )}
         <div className="flex items-center justify-center gap-2">

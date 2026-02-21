@@ -241,6 +241,18 @@ export function VolunteerForm() {
                 />
                 Every Friday
               </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={recurringDays.includes('Saturday')}
+                  onChange={(e) => {
+                    if (e.target.checked) setRecurringDays([...recurringDays, 'Saturday']);
+                    else setRecurringDays(recurringDays.filter(d => d !== 'Saturday'));
+                  }}
+                  className="rounded border-input"
+                />
+                Every Saturday
+              </label>
             </div>
           </CardContent>
         </Card>

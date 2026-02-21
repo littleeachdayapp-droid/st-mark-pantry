@@ -15,6 +15,7 @@ function getDayOfWeek(d: Date): string | null {
   const dow = d.getDay();
   if (dow === 1) return 'Monday';
   if (dow === 5) return 'Friday';
+  if (dow === 6) return 'Saturday';
   return null;
 }
 

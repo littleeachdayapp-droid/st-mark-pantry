@@ -105,6 +105,9 @@ export function VolunteerListPage() {
                       {volunteer.recurringDays?.includes('Friday') && (
                         <Badge variant="outline" className="shrink-0">Fri</Badge>
                       )}
+                      {volunteer.recurringDays?.includes('Saturday') && (
+                        <Badge variant="outline" className="shrink-0">Sat</Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">
                       {volunteer.phone && (

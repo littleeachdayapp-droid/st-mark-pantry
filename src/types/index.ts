@@ -30,7 +30,7 @@ export interface Visit {
   id: string;
   clientId: string;
   date: string;
-  dayOfWeek: 'Monday' | 'Friday';
+  dayOfWeek: PantryDay;
   itemsReceived?: string;
   servedBy?: string;
   notes?: string;
@@ -52,7 +52,7 @@ export interface VolunteerShift {
   id: string;
   volunteerId: string;
   date: string;
-  dayOfWeek: 'Monday' | 'Friday';
+  dayOfWeek: PantryDay;
   hoursWorked?: number;
   role?: string;
   notes?: string;
@@ -68,4 +68,4 @@ export interface VolunteerSignup {
   createdAt: string;
 }
 
-export type PantryDay = 'Monday' | 'Friday';
+export type PantryDay = 'Monday' | 'Friday' | 'Saturday';

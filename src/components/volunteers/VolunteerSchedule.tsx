@@ -20,7 +20,11 @@ import { CalendarDays, UserPlus, X, RefreshCw, UserCheck, ArrowLeft, Briefcase }
 import { searchVolunteers } from '@/utils/search';
 import type { PantryDay, Volunteer, VolunteerSignup } from '@/types';
 
-const ROLES = ['Intake', 'Distribution', 'Setup', 'Cleanup', 'Other'] as const;
+const ROLES = ['Intake', 'Distribution', 'Setup', 'Cleanup', 'TJ Pickup', 'Unloading', 'Other'] as const;
+
+const SESSION_DESCRIPTIONS: Partial<Record<PantryDay, string>> = {
+  Saturday: 'Trader Joe\u2019s pickup at 8:30 AM, unloading at St. Mark at 9:00 AM',
+};
 
 function formatISODate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -41,6 +45,8 @@ function getUpcomingPantryDates(weeks: number = 4): { date: string; dayOfWeek: P
       dates.push({ date: formatISODate(current), dayOfWeek: 'Monday' });
     } else if (dow === 5) {
       dates.push({ date: formatISODate(current), dayOfWeek: 'Friday' });
+    } else if (dow === 6) {
+      dates.push({ date: formatISODate(current), dayOfWeek: 'Saturday' });
     }
     current.setDate(current.getDate() + 1);
   }
@@ -293,6 +299,11 @@ export function VolunteerSchedule() {
                       </Button>
                     </div>
                   </div>
+                  {SESSION_DESCRIPTIONS[dayOfWeek] && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {SESSION_DESCRIPTIONS[dayOfWeek]}
+                    </p>
+                  )}
                 </CardHeader>
                 <CardContent>
                   {scheduled.length === 0 ? (
