@@ -13,6 +13,7 @@ interface SignupBody {
   dayOfWeek: string;
   role?: string;
   recurringDays?: string[];
+  recurringSlots?: string[];
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -22,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const body = req.body as SignupBody;
-    const { signupId, volunteerId, firstName, lastName, email, date, dayOfWeek, role, recurringDays } = body;
+    const { signupId, volunteerId, firstName, lastName, email, date, dayOfWeek, role, recurringDays, recurringSlots } = body;
 
     if (!volunteerId || !firstName || !date || !dayOfWeek) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -35,6 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       last_name: lastName,
       email: email || null,
       recurring_days: recurringDays || [],
+      recurring_slots: recurringSlots || [],
       synced_at: new Date().toISOString(),
     }, { onConflict: 'id' });
 

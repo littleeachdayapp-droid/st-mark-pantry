@@ -8,7 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save } from 'lucide-react';
+import { legacyDaysToSlots } from '@/utils/dateHelpers';
 import type { PantryDay, Volunteer } from '@/types';
+
+const DAYS: PantryDay[] = ['Monday', 'Friday', 'Saturday'];
+const DAY_SHORT: Record<PantryDay, string> = { Monday: 'Mon', Friday: 'Fri', Saturday: 'Sat' };
+const ORDINALS = ['1st', '2nd', '3rd', '4th'] as const;
 
 export function VolunteerForm() {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +30,7 @@ export function VolunteerForm() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [notes, setNotes] = useState('');
-  const [recurringDays, setRecurringDays] = useState<PantryDay[]>([]);
+  const [recurringSlots, setRecurringSlots] = useState<string[]>([]);
 
   // Load existing volunteer data for edit mode
   useEffect(() => {
@@ -47,7 +52,12 @@ export function VolunteerForm() {
       setPhone(volunteer.phone ?? '');
       setEmail(volunteer.email ?? '');
       setNotes(volunteer.notes ?? '');
-      setRecurringDays(volunteer.recurringDays ?? []);
+      // Migrate legacy recurringDays to recurringSlots format
+      if (volunteer.recurringSlots && volunteer.recurringSlots.length > 0) {
+        setRecurringSlots(volunteer.recurringSlots);
+      } else if (volunteer.recurringDays && volunteer.recurringDays.length > 0) {
+        setRecurringSlots(legacyDaysToSlots(volunteer.recurringDays));
+      }
       setLoading(false);
     }
 
@@ -72,7 +82,8 @@ export function VolunteerForm() {
         phone: phone.trim() || undefined,
         email: email.trim() || undefined,
         notes: notes.trim() || undefined,
-        recurringDays: recurringDays.length > 0 ? recurringDays : undefined,
+        recurringSlots: recurringSlots.length > 0 ? recurringSlots : undefined,
+        recurringDays: undefined as PantryDay[] | undefined, // clear legacy field
       };
 
       if (isEdit && id) {
@@ -85,7 +96,7 @@ export function VolunteerForm() {
             firstName: volunteerData.firstName,
             lastName: volunteerData.lastName,
             email: volunteerData.email,
-            recurringDays: volunteerData.recurringDays,
+            recurringSlots: volunteerData.recurringSlots,
           });
         }
 
@@ -105,7 +116,7 @@ export function VolunteerForm() {
             firstName: volunteerData.firstName,
             lastName: volunteerData.lastName,
             email: volunteerData.email,
-            recurringDays: volunteerData.recurringDays,
+            recurringSlots: volunteerData.recurringSlots,
           });
         }
 
@@ -214,45 +225,79 @@ export function VolunteerForm() {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Which days does this volunteer regularly serve?
+              Which sessions does this volunteer regularly serve?
             </p>
-            <div className="flex items-center gap-6">
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={recurringDays.includes('Monday')}
-                  onChange={(e) => {
-                    if (e.target.checked) setRecurringDays([...recurringDays, 'Monday']);
-                    else setRecurringDays(recurringDays.filter(d => d !== 'Monday'));
-                  }}
-                  className="rounded border-input"
-                />
-                Every Monday
-              </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={recurringDays.includes('Friday')}
-                  onChange={(e) => {
-                    if (e.target.checked) setRecurringDays([...recurringDays, 'Friday']);
-                    else setRecurringDays(recurringDays.filter(d => d !== 'Friday'));
-                  }}
-                  className="rounded border-input"
-                />
-                Every Friday
-              </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={recurringDays.includes('Saturday')}
-                  onChange={(e) => {
-                    if (e.target.checked) setRecurringDays([...recurringDays, 'Saturday']);
-                    else setRecurringDays(recurringDays.filter(d => d !== 'Saturday'));
-                  }}
-                  className="rounded border-input"
-                />
-                Every Saturday
-              </label>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr>
+                    <th className="text-left py-1 pr-4 font-medium text-muted-foreground" />
+                    {DAYS.map((day) => (
+                      <th key={day} className="text-center py-1 px-2 font-medium">
+                        {DAY_SHORT[day]}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Every row */}
+                  <tr className="border-b">
+                    <td className="py-2 pr-4 font-medium">Every</td>
+                    {DAYS.map((day) => {
+                      const slot = `every-${day}`;
+                      const isEvery = recurringSlots.includes(slot);
+                      return (
+                        <td key={day} className="text-center py-2 px-2">
+                          <input
+                            type="checkbox"
+                            checked={isEvery}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                // Add "every" and remove individual ordinals for this day
+                                const filtered = recurringSlots.filter(
+                                  (s) => !s.endsWith(`-${day}`)
+                                );
+                                setRecurringSlots([...filtered, slot]);
+                              } else {
+                                setRecurringSlots(recurringSlots.filter((s) => s !== slot));
+                              }
+                            }}
+                            className="rounded border-input cursor-pointer"
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  {/* Ordinal rows */}
+                  {ORDINALS.map((ordinal) => (
+                    <tr key={ordinal}>
+                      <td className="py-2 pr-4 text-muted-foreground">{ordinal}</td>
+                      {DAYS.map((day) => {
+                        const slot = `${ordinal}-${day}`;
+                        const everySlot = `every-${day}`;
+                        const isEvery = recurringSlots.includes(everySlot);
+                        return (
+                          <td key={day} className="text-center py-2 px-2">
+                            <input
+                              type="checkbox"
+                              checked={isEvery || recurringSlots.includes(slot)}
+                              disabled={isEvery}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setRecurringSlots([...recurringSlots, slot]);
+                                } else {
+                                  setRecurringSlots(recurringSlots.filter((s) => s !== slot));
+                                }
+                              }}
+                              className="rounded border-input cursor-pointer disabled:opacity-40"
+                            />
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </CardContent>
         </Card>

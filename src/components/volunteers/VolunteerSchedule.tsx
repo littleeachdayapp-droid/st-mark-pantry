@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { CalendarDays, UserPlus, X, RefreshCw, UserCheck, ArrowLeft, Briefcase } from 'lucide-react';
 import { searchVolunteers } from '@/utils/search';
+import { matchesRecurringSlot, formatSlot } from '@/utils/dateHelpers';
 import type { PantryDay, Volunteer, VolunteerSignup } from '@/types';
 
 const ROLES = ['Intake', 'Distribution', 'Setup', 'Cleanup', 'TJ Pickup', 'Unloading', 'Other'] as const;
@@ -89,7 +90,7 @@ function getVolunteersForDate(
 
   // Recurring volunteers (not cancelled for this date)
   for (const v of volunteers) {
-    if (v.recurringDays?.includes(dayOfWeek) && !cancelledIds.has(v.id)) {
+    if (matchesRecurringSlot(v.recurringSlots, v.recurringDays, date, dayOfWeek) && !cancelledIds.has(v.id)) {
       result.push({ volunteer: v, source: 'recurring' });
       addedIds.add(v.id);
     }
@@ -183,7 +184,7 @@ export function VolunteerSchedule() {
             date: signupDate,
             dayOfWeek: signupDayOfWeek,
             role: selectedRole || undefined,
-            recurringDays: vol.recurringDays,
+            recurringSlots: vol.recurringSlots,
           });
         }
       }
@@ -413,11 +414,15 @@ export function VolunteerSchedule() {
                     onClick={() => setSelectedVolunteerId(v.id)}
                   >
                     {v.firstName} {v.lastName}
-                    {v.recurringDays && v.recurringDays.length > 0 && (
+                    {v.recurringSlots && v.recurringSlots.length > 0 ? (
                       <span className="text-muted-foreground ml-2">
-                        (Regular: {v.recurringDays.join(' & ')})
+                        (Regular: {v.recurringSlots.map(formatSlot).join(', ')})
                       </span>
-                    )}
+                    ) : v.recurringDays && v.recurringDays.length > 0 ? (
+                      <span className="text-muted-foreground ml-2">
+                        (Regular: Every {v.recurringDays.join(' & ')})
+                      </span>
+                    ) : null}
                   </button>
                 ))
               )}

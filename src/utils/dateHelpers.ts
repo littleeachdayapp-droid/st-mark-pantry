@@ -125,6 +125,70 @@ export function getDaysAgoISO(days: number): string {
   return formatISO(d);
 }
 
+/**
+ * Returns which occurrence (1-5) of a weekday this date is within its month.
+ * E.g. Feb 16, 2026 (Monday) → 3 (3rd Monday of February).
+ */
+export function getOrdinalWeek(date: Date): number {
+  const dayOfMonth = date.getDate();
+  return Math.ceil(dayOfMonth / 7);
+}
+
+const ORDINAL_LABELS = ['1st', '2nd', '3rd', '4th', '5th'] as const;
+
+/**
+ * Returns the recurring slot string for a given ISO date.
+ * E.g. "2026-02-16" (a Monday) → "3rd-Monday"
+ */
+export function getRecurringSlot(iso: string): string {
+  const d = parseLocalDate(iso);
+  const dayName = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(d);
+  const ordinal = getOrdinalWeek(d);
+  return `${ORDINAL_LABELS[ordinal - 1]}-${dayName}`;
+}
+
+/**
+ * Checks if a volunteer's recurringSlots match a given date.
+ * Handles both ordinal slots ("1st-Monday") and "every-Monday" format.
+ * Falls back to legacy recurringDays if recurringSlots is empty.
+ */
+export function matchesRecurringSlot(
+  recurringSlots: string[] | undefined,
+  recurringDays: PantryDay[] | undefined,
+  iso: string,
+  dayOfWeek: PantryDay
+): boolean {
+  // Use recurringSlots if available
+  if (recurringSlots && recurringSlots.length > 0) {
+    const slot = getRecurringSlot(iso);
+    const everySlot = `every-${dayOfWeek}`;
+    return recurringSlots.includes(slot) || recurringSlots.includes(everySlot);
+  }
+  // Fall back to legacy recurringDays (treat as "every")
+  if (recurringDays && recurringDays.length > 0) {
+    return recurringDays.includes(dayOfWeek);
+  }
+  return false;
+}
+
+/**
+ * Converts legacy recurringDays to recurringSlots format.
+ * E.g. ['Monday', 'Friday'] → ['every-Monday', 'every-Friday']
+ */
+export function legacyDaysToSlots(recurringDays: PantryDay[]): string[] {
+  return recurringDays.map(day => `every-${day}`);
+}
+
+/**
+ * Formats a recurring slot for display.
+ * E.g. "1st-Monday" → "1st Monday", "every-Friday" → "Every Friday"
+ */
+export function formatSlot(slot: string): string {
+  const [ordinal, day] = slot.split('-');
+  if (ordinal === 'every') return `Every ${day}`;
+  return `${ordinal} ${day}`;
+}
+
 // ---- Helpers ----
 
 /**

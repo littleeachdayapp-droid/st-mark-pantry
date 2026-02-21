@@ -17,7 +17,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from '@/components/ui/dialog';
-import { formatDate } from '@/utils/dateHelpers';
+import { formatDate, formatSlot } from '@/utils/dateHelpers';
 
 export function VolunteerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -155,12 +155,17 @@ export function VolunteerDetail() {
           )}
         </div>
 
-        {volunteer.recurringDays && volunteer.recurringDays.length > 0 && (
+        {volunteer.recurringSlots && volunteer.recurringSlots.length > 0 ? (
           <div className="mt-4 flex items-center gap-2 text-sm">
             <CalendarDays className="size-4 text-muted-foreground" />
-            <span>Regular: {volunteer.recurringDays.join(' & ')}</span>
+            <span>Regular: {volunteer.recurringSlots.map(formatSlot).join(', ')}</span>
           </div>
-        )}
+        ) : volunteer.recurringDays && volunteer.recurringDays.length > 0 ? (
+          <div className="mt-4 flex items-center gap-2 text-sm">
+            <CalendarDays className="size-4 text-muted-foreground" />
+            <span>Regular: Every {volunteer.recurringDays.join(' & ')}</span>
+          </div>
+        ) : null}
 
         {volunteer.notes && (
           <div className="mt-4 rounded-md bg-muted/50 p-3 text-sm">

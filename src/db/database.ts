@@ -33,6 +33,15 @@ export class PantryDatabase extends Dexie {
       volunteerShifts: 'id, volunteerId, date, dayOfWeek',
       volunteerSignups: 'id, volunteerId, date, [volunteerId+date], dayOfWeek, status',
     });
+
+    // Version 4: add recurringSlots on volunteers (non-indexed field, no schema change needed)
+    this.version(4).stores({
+      clients: 'id, firstName, lastName, [firstName+lastName], createdAt',
+      visits: 'id, clientId, date, [clientId+date], dayOfWeek',
+      volunteers: 'id, firstName, lastName, createdAt',
+      volunteerShifts: 'id, volunteerId, date, dayOfWeek',
+      volunteerSignups: 'id, volunteerId, date, [volunteerId+date], dayOfWeek, status',
+    });
   }
 }
 

@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
-import { Search, UserPlus, Phone, Mail, ClipboardCheck, CalendarDays } from 'lucide-react';
+import { Search, UserPlus, Phone, Mail, ClipboardCheck, CalendarDays, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { searchVolunteers } from '@/utils/search';
-import { formatDate } from '@/utils/dateHelpers';
+import { formatDate, formatSlot } from '@/utils/dateHelpers';
 
 export function VolunteerListPage() {
   const [query, setQuery] = useState('');
@@ -40,6 +40,12 @@ export function VolunteerListPage() {
           </span>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/volunteers/calendar">
+              <Calendar className="size-4" />
+              Calendar
+            </Link>
+          </Button>
           <Button variant="outline" asChild>
             <Link to="/volunteers/schedule">
               <CalendarDays className="size-4" />
@@ -99,14 +105,24 @@ export function VolunteerListPage() {
                       <Badge variant="secondary" className="shrink-0">
                         Since {formatDate(volunteer.createdAt)}
                       </Badge>
-                      {volunteer.recurringDays?.includes('Monday') && (
-                        <Badge variant="outline" className="shrink-0">Mon</Badge>
-                      )}
-                      {volunteer.recurringDays?.includes('Friday') && (
-                        <Badge variant="outline" className="shrink-0">Fri</Badge>
-                      )}
-                      {volunteer.recurringDays?.includes('Saturday') && (
-                        <Badge variant="outline" className="shrink-0">Sat</Badge>
+                      {volunteer.recurringSlots && volunteer.recurringSlots.length > 0 ? (
+                        volunteer.recurringSlots.map((slot) => (
+                          <Badge key={slot} variant="outline" className="shrink-0 text-xs">
+                            {formatSlot(slot)}
+                          </Badge>
+                        ))
+                      ) : (
+                        <>
+                          {volunteer.recurringDays?.includes('Monday') && (
+                            <Badge variant="outline" className="shrink-0">Every Mon</Badge>
+                          )}
+                          {volunteer.recurringDays?.includes('Friday') && (
+                            <Badge variant="outline" className="shrink-0">Every Fri</Badge>
+                          )}
+                          {volunteer.recurringDays?.includes('Saturday') && (
+                            <Badge variant="outline" className="shrink-0">Every Sat</Badge>
+                          )}
+                        </>
                       )}
                     </div>
                     <div className="flex items-center gap-3 mt-0.5 text-sm text-muted-foreground">

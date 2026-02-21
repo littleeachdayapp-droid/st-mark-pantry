@@ -106,6 +106,7 @@ export function SettingsPage() {
         lastName: v.lastName,
         email: v.email,
         recurringDays: v.recurringDays,
+        recurringSlots: v.recurringSlots,
       }))
 
       const result = await apiPost('/api/volunteers/sync-all', { volunteers: payload })

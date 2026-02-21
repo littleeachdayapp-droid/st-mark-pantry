@@ -7,6 +7,7 @@ interface SyncBody {
   lastName: string;
   email?: string;
   recurringDays?: string[];
+  recurringSlots?: string[];
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -16,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const body = req.body as SyncBody;
-    const { id, firstName, lastName, email, recurringDays } = body;
+    const { id, firstName, lastName, email, recurringDays, recurringSlots } = body;
 
     if (!id || !firstName || !lastName) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -28,6 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       last_name: lastName,
       email: email || null,
       recurring_days: recurringDays || [],
+      recurring_slots: recurringSlots || [],
       synced_at: new Date().toISOString(),
     }, { onConflict: 'id' });
 

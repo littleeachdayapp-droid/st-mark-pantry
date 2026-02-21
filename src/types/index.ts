@@ -44,7 +44,8 @@ export interface Volunteer {
   phone?: string;
   email?: string;
   notes?: string;
-  recurringDays?: PantryDay[];
+  recurringDays?: PantryDay[];       // deprecated, kept for backward compat
+  recurringSlots?: string[];          // e.g. ['1st-Monday', 'every-Friday', '2nd-Saturday']
   createdAt: string;
 }
 

@@ -11,6 +11,7 @@ import { VolunteerDetail } from '@/components/volunteers/VolunteerDetail'
 import { VolunteerForm } from '@/components/volunteers/VolunteerForm'
 import { VolunteerCheckIn } from '@/components/volunteers/VolunteerCheckIn'
 import { VolunteerSchedule } from '@/components/volunteers/VolunteerSchedule'
+import { VolunteerCalendar } from '@/components/volunteers/VolunteerCalendar'
 import { ReportsPage } from '@/components/reports/ReportsPage'
 import { InactiveClientsPage } from '@/components/reports/InactiveClientsPage'
 import { SettingsPage } from '@/components/settings/SettingsPage'
@@ -30,6 +31,7 @@ export function App() {
         <Route path="volunteers/new" element={<VolunteerForm />} />
         <Route path="volunteers/checkin" element={<VolunteerCheckIn />} />
         <Route path="volunteers/schedule" element={<VolunteerSchedule />} />
+        <Route path="volunteers/calendar" element={<VolunteerCalendar />} />
         <Route path="volunteers/:id" element={<VolunteerDetail />} />
         <Route path="volunteers/:id/edit" element={<VolunteerForm />} />
         <Route path="reports" element={<ReportsPage />} />

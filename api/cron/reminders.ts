@@ -19,6 +19,12 @@ function getDayOfWeek(d: Date): string | null {
   return null;
 }
 
+function getOrdinalWeek(d: Date): number {
+  return Math.ceil(d.getDate() / 7);
+}
+
+const ORDINAL_LABELS = ['1st', '2nd', '3rd', '4th', '5th'];
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Verify cron secret
   const authHeader = req.headers.authorization;
@@ -45,11 +51,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    // Compute the ordinal slot for the target date (e.g. "2nd-Monday")
+    const ordinal = getOrdinalWeek(target);
+    const ordinalSlot = `${ORDINAL_LABELS[ordinal - 1]}-${dayOfWeek}`;
+    const everySlot = `every-${dayOfWeek}`;
+
     // Gather volunteers to remind:
-    // 1. Recurring volunteers matching this day
-    const { data: recurringVolunteers } = await getSupabase()
+    // 1a. Volunteers with matching recurring_slots (new format)
+    const { data: slotVolunteersOrdinal } = await getSupabase()
       .from('volunteers')
       .select('id, first_name, email')
+      .not('email', 'is', null)
+      .contains('recurring_slots', [ordinalSlot]);
+
+    const { data: slotVolunteersEvery } = await getSupabase()
+      .from('volunteers')
+      .select('id, first_name, email')
+      .not('email', 'is', null)
+      .contains('recurring_slots', [everySlot]);
+
+    // 1b. Legacy: recurring volunteers matching this day (old format)
+    const { data: recurringVolunteers } = await getSupabase()
+      .from('volunteers')
+      .select('id, first_name, email, recurring_slots')
       .not('email', 'is', null)
       .contains('recurring_days', [dayOfWeek]);
 
@@ -72,8 +96,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Build volunteer set: recurring (not cancelled) + explicit signups
     const toRemind = new Map<string, { firstName: string; email: string; role?: string }>();
 
-    for (const v of recurringVolunteers || []) {
+    // Add volunteers with recurring_slots match (new format)
+    for (const v of slotVolunteersOrdinal || []) {
       if (!cancelledIds.has(v.id) && v.email) {
+        toRemind.set(v.id, { firstName: v.first_name, email: v.email });
+      }
+    }
+    for (const v of slotVolunteersEvery || []) {
+      if (!cancelledIds.has(v.id) && v.email && !toRemind.has(v.id)) {
+        toRemind.set(v.id, { firstName: v.first_name, email: v.email });
+      }
+    }
+
+    // Add legacy recurring_days volunteers (only if they don't have recurring_slots)
+    for (const v of recurringVolunteers || []) {
+      const hasSlots = v.recurring_slots && Array.isArray(v.recurring_slots) && v.recurring_slots.length > 0;
+      if (!hasSlots && !cancelledIds.has(v.id) && v.email && !toRemind.has(v.id)) {
         toRemind.set(v.id, { firstName: v.first_name, email: v.email });
       }
     }

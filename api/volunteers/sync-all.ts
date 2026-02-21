@@ -7,6 +7,7 @@ interface VolunteerData {
   lastName: string;
   email?: string;
   recurringDays?: string[];
+  recurringSlots?: string[];
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -33,6 +34,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         last_name: v.lastName,
         email: v.email || null,
         recurring_days: v.recurringDays || [],
+        recurring_slots: v.recurringSlots || [],
         synced_at: now,
       }));
 
