@@ -7,7 +7,7 @@
   'use strict';
 
   // ---- Config ----
-  var API_BASE = 'https://st-mark-pantry.vercel.app';
+  var API_BASE = '';
   var WEEKS_AHEAD = 5;
   var PANTRY_DAYS = [1, 5, 6]; // Mon=1, Fri=5, Sat=6
 

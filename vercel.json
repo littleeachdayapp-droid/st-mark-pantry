@@ -11,7 +11,7 @@
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!api|assets|icons|sw|workbox|manifest|registerSW|favicon).*)", "destination": "/index.html" }
+    { "source": "/((?!api|assets|icons|sw|workbox|manifest|registerSW|favicon|site).*)", "destination": "/index.html" }
   ],
   "crons": [
     {
