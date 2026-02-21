@@ -17,10 +17,12 @@ import {
   DialogTrigger,
   DialogClose,
 } from '@/components/ui/dialog';
+import { useSettings } from '@/contexts/SettingsContext';
 import { formatDate, getTodayISO } from '@/utils/dateHelpers';
 import { ClientQRCard } from './ClientQRCard';
 
 export function ClientDetail() {
+  const { settings } = useSettings();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -270,18 +272,25 @@ export function ClientDetail() {
               {visits.map((visit) => (
                 <div
                   key={visit.id}
-                  className="flex items-center justify-between rounded-md border px-3 py-2"
+                  className="rounded-md border px-3 py-2 space-y-1"
                 >
-                  <div className="min-w-0">
-                    <span className="text-sm font-medium">{formatDate(visit.date)}</span>
-                    <span className="text-sm text-muted-foreground ml-2">
-                      ({visit.dayOfWeek})
-                    </span>
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0">
+                      <span className="text-sm font-medium">{formatDate(visit.date)}</span>
+                      <span className="text-sm text-muted-foreground ml-2">
+                        ({visit.dayOfWeek})
+                      </span>
+                    </div>
+                    {visit.servedBy && (
+                      <span className="text-sm text-muted-foreground shrink-0 ml-2">
+                        Served by {visit.servedBy}
+                      </span>
+                    )}
                   </div>
-                  {visit.servedBy && (
-                    <span className="text-sm text-muted-foreground shrink-0 ml-2">
-                      Served by {visit.servedBy}
-                    </span>
+                  {settings.inventoryEnabled && visit.itemsReceived && (
+                    <p className="text-xs text-muted-foreground">
+                      Items: {visit.itemsReceived}
+                    </p>
                   )}
                 </div>
               ))}

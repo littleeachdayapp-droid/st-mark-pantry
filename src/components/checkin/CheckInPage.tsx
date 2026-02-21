@@ -15,10 +15,12 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { useSettings } from '@/contexts/SettingsContext';
 import { searchClients } from '@/utils/search';
 import { getTodayISO, formatDate } from '@/utils/dateHelpers';
 import TodaysList from './TodaysList';
 import { QRScanner } from './QRScanner';
+import { ItemsReceivedDialog } from './ItemsReceivedDialog';
 import type { Client, PantryDay, Visit } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -64,6 +66,8 @@ async function getLastVisitThisMonth(
 // ---------------------------------------------------------------------------
 
 export function CheckInPage() {
+  const { settings } = useSettings();
+
   // --- Date / Day state ---
   const today = getTodayISO();
   const [selectedDay, setSelectedDay] = useState<PantryDay | null>(
@@ -82,6 +86,11 @@ export function CheckInPage() {
   const [showWarning, setShowWarning] = useState(false);
   const [pendingClient, setPendingClient] = useState<Client | null>(null);
   const [lastVisitDate, setLastVisitDate] = useState<string | null>(null);
+
+  // --- Items received dialog state ---
+  const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
+  const [lastVisitId, setLastVisitId] = useState('');
+  const [lastClientName, setLastClientName] = useState('');
 
   // --- Monthly visit cache for search results ---
   const [monthlyVisitMap, setMonthlyVisitMap] = useState<
@@ -146,8 +155,9 @@ export function CheckInPage() {
   const doCheckIn = useCallback(
     async (client: Client) => {
       if (!selectedDay) return; // shouldn't happen if UI prevents it
+      const visitId = crypto.randomUUID();
       await db.visits.add({
-        id: crypto.randomUUID(),
+        id: visitId,
         clientId: client.id,
         date: selectedDate,
         dayOfWeek: selectedDay,
@@ -157,8 +167,15 @@ export function CheckInPage() {
       setSearchQuery('');
       setPendingClient(null);
       setShowWarning(false);
+
+      // Show items dialog if inventory tracking is enabled
+      if (settings.inventoryEnabled) {
+        setLastVisitId(visitId);
+        setLastClientName(`${client.firstName} ${client.lastName}`);
+        setItemsDialogOpen(true);
+      }
     },
-    [selectedDate, selectedDay, servedBy]
+    [selectedDate, selectedDay, servedBy, settings.inventoryEnabled]
   );
 
   const handleCheckIn = useCallback(
@@ -332,6 +349,16 @@ export function CheckInPage() {
       >
         <UserPlus className="size-6" />
       </Link>
+
+      {/* ---- Items received dialog ---- */}
+      {settings.inventoryEnabled && (
+        <ItemsReceivedDialog
+          open={itemsDialogOpen}
+          onOpenChange={setItemsDialogOpen}
+          visitId={lastVisitId}
+          clientName={lastClientName}
+        />
+      )}
 
       {/* ---- Monthly duplicate warning dialog ---- */}
       <Dialog open={showWarning} onOpenChange={setShowWarning}>

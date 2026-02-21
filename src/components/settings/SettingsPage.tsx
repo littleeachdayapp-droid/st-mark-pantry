@@ -1,10 +1,13 @@
 import { useRef, useState } from 'react'
-import { Download, Upload, FileSpreadsheet, Info } from 'lucide-react'
+import { Download, Upload, FileSpreadsheet, Info, Package } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { db } from '@/db/database'
+import { useSettings } from '@/contexts/SettingsContext'
 import { DataImport } from './DataImport'
 import { GoogleSheetsExport } from './GoogleSheetsExport'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 import {
   Card,
   CardContent,
@@ -14,6 +17,7 @@ import {
 } from '@/components/ui/card'
 
 export function SettingsPage() {
+  const { settings, updateSettings } = useSettings()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [importing, setImporting] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -143,6 +147,36 @@ export function SettingsPage() {
           {message.text}
         </div>
       )}
+
+      {/* Features */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="size-4" />
+            Features
+          </CardTitle>
+          <CardDescription>Enable or disable optional features.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="inventory-toggle" className="text-sm font-medium">
+                Inventory Tracking
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Record items given during check-in
+              </p>
+            </div>
+            <Switch
+              id="inventory-toggle"
+              checked={settings.inventoryEnabled}
+              onCheckedChange={(checked) =>
+                updateSettings({ inventoryEnabled: checked === true })
+              }
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Data Management */}
       <Card>

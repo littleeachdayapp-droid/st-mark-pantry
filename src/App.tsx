@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
+import { DashboardPage } from '@/components/dashboard/DashboardPage'
 import { CheckInPage } from '@/components/checkin/CheckInPage'
 import { ClientListPage } from '@/components/clients/ClientListPage'
 import { ClientDetail } from '@/components/clients/ClientDetail'
@@ -11,13 +12,15 @@ import { VolunteerForm } from '@/components/volunteers/VolunteerForm'
 import { VolunteerCheckIn } from '@/components/volunteers/VolunteerCheckIn'
 import { VolunteerSchedule } from '@/components/volunteers/VolunteerSchedule'
 import { ReportsPage } from '@/components/reports/ReportsPage'
+import { InactiveClientsPage } from '@/components/reports/InactiveClientsPage'
 import { SettingsPage } from '@/components/settings/SettingsPage'
 
 export function App() {
   return (
     <Routes>
       <Route element={<AppShell />}>
-        <Route index element={<CheckInPage />} />
+        <Route index element={<DashboardPage />} />
+        <Route path="checkin" element={<CheckInPage />} />
         <Route path="clients" element={<ClientListPage />} />
         <Route path="clients/new" element={<ClientForm />} />
         <Route path="clients/cards" element={<PrintAllCards />} />
@@ -30,6 +33,7 @@ export function App() {
         <Route path="volunteers/:id" element={<VolunteerDetail />} />
         <Route path="volunteers/:id/edit" element={<VolunteerForm />} />
         <Route path="reports" element={<ReportsPage />} />
+        <Route path="reports/inactive" element={<InactiveClientsPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
     </Routes>

@@ -1,16 +1,16 @@
 import { NavLink } from 'react-router-dom'
 import {
-  ClipboardCheck,
+  Home,
   Users,
-  HandHeart,
+  ClipboardCheck,
   BarChart3,
   Settings,
 } from 'lucide-react'
 
 const tabs = [
-  { to: '/', label: 'Check-In', icon: ClipboardCheck, end: true },
+  { to: '/', label: 'Home', icon: Home, end: true },
   { to: '/clients', label: 'Clients', icon: Users, end: false },
-  { to: '/volunteers', label: 'Volunteers', icon: HandHeart, end: false },
+  { to: '/checkin', label: 'Check-In', icon: ClipboardCheck, end: false },
   { to: '/reports', label: 'Reports', icon: BarChart3, end: false },
   { to: '/settings', label: 'Settings', icon: Settings, end: false },
 ]

@@ -1,13 +1,16 @@
 import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
 import * as XLSX from 'xlsx';
-import { Download, Users, HandHeart, Calendar, Clock } from 'lucide-react';
+import { Download, Users, HandHeart, Calendar, Clock, UserX, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { getTodayISO, getMonthRange } from '@/utils/dateHelpers';
+import { StatCard } from '@/components/dashboard/StatCard';
+import { useSettings } from '@/contexts/SettingsContext';
+import { getTodayISO, getMonthRange, formatDate } from '@/utils/dateHelpers';
 import { PrintVisitLog } from './PrintVisitLog';
 import type { Client, Volunteer } from '@/types';
 
@@ -35,38 +38,11 @@ function exportMultiSheetExcel(
 }
 
 // ---------------------------------------------------------------------------
-// Stat Card Component
-// ---------------------------------------------------------------------------
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <Card className="py-4">
-      <CardContent className="flex items-center gap-3 px-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          <Icon className="size-5 text-primary" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-2xl font-bold leading-none">{value}</p>
-          <p className="text-xs text-muted-foreground mt-1">{label}</p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
 
 export function ReportsPage() {
+  const { settings } = useSettings();
   const today = getTodayISO();
   const { start: monthStart, end: monthEnd } = getMonthRange();
 
@@ -152,6 +128,29 @@ export function ReportsPage() {
     () => Math.max(...monthlyData.map((m) => m.count), 0),
     [monthlyData]
   );
+
+  // --- Items distributed this month (when inventory enabled) ---
+  const itemsDistributed = useMemo(() => {
+    if (!settings.inventoryEnabled || !visits || !clients) return [];
+    const clientMap = new Map(clients.map((c) => [c.id, c]));
+    return visits
+      .filter(
+        (v) =>
+          v.date >= monthStart &&
+          v.date <= monthEnd &&
+          v.itemsReceived
+      )
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .map((v) => {
+        const client = clientMap.get(v.clientId);
+        return {
+          id: v.id,
+          name: client ? `${client.firstName} ${client.lastName}` : 'Unknown',
+          date: v.date,
+          items: v.itemsReceived!,
+        };
+      });
+  }, [settings.inventoryEnabled, visits, clients, monthStart, monthEnd]);
 
   // --- Current month label ---
   const currentMonthLabel = new Date().toLocaleDateString('en-US', {
@@ -306,6 +305,57 @@ export function ReportsPage() {
           />
         </div>
       </section>
+
+      {/* ---- Inactive Clients Link ---- */}
+      <Link
+        to="/reports/inactive"
+        className="flex items-center gap-3 rounded-xl border p-4 transition-colors hover:bg-accent"
+      >
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900">
+          <UserX className="size-5 text-yellow-700 dark:text-yellow-300" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium">Inactive Clients</p>
+          <p className="text-xs text-muted-foreground">
+            Clients not visited in 30/60/90 days
+          </p>
+        </div>
+        <ChevronRight className="size-5 text-muted-foreground shrink-0" />
+      </Link>
+
+      {/* ---- Items Distributed (when inventory enabled) ---- */}
+      {settings.inventoryEnabled && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Items Distributed</CardTitle>
+            <CardDescription>{currentMonthLabel}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {itemsDistributed.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No items recorded this month.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {itemsDistributed.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-md border px-3 py-2 space-y-0.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{item.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(item.date)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{item.items}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Separator />
 

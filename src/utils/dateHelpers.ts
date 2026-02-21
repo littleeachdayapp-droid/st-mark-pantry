@@ -106,12 +106,21 @@ export function isSameMonth(date1: string, date2: string): boolean {
   return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth();
 }
 
-// ---- Internal helpers ----
+/**
+ * Returns a 'YYYY-MM-DD' string for `days` days ago.
+ */
+export function getDaysAgoISO(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return formatISO(d);
+}
+
+// ---- Helpers ----
 
 /**
  * Parses a 'YYYY-MM-DD' string as a local date (not UTC).
  */
-function parseLocalDate(iso: string): Date {
+export function parseLocalDate(iso: string): Date {
   const [year, month, day] = iso.split('-').map(Number);
   return new Date(year, month - 1, day);
 }
@@ -119,7 +128,7 @@ function parseLocalDate(iso: string): Date {
 /**
  * Formats a Date object as 'YYYY-MM-DD'.
  */
-function formatISO(date: Date): string {
+export function formatISO(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
