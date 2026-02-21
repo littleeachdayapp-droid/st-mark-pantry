@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
-import { Download, Upload, FileSpreadsheet, Info, Package } from 'lucide-react'
+import { Download, Upload, FileSpreadsheet, Info, Package, Bell, CloudUpload } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import { db } from '@/db/database'
 import { useSettings } from '@/contexts/SettingsContext'
+import { apiPost } from '@/lib/api'
 import { DataImport } from './DataImport'
 import { GoogleSheetsExport } from './GoogleSheetsExport'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,7 @@ export function SettingsPage() {
   const { settings, updateSettings } = useSettings()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [importing, setImporting] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const showMessage = (type: 'success' | 'error', text: string) => {
@@ -86,6 +88,37 @@ export function SettingsPage() {
     } finally {
       setImporting(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const syncAllVolunteers = async () => {
+    setSyncing(true)
+    try {
+      const volunteers = await db.volunteers.toArray()
+      if (volunteers.length === 0) {
+        showMessage('error', 'No volunteers to sync.')
+        return
+      }
+
+      const payload = volunteers.map((v) => ({
+        id: v.id,
+        firstName: v.firstName,
+        lastName: v.lastName,
+        email: v.email,
+        recurringDays: v.recurringDays,
+      }))
+
+      const result = await apiPost('/api/volunteers/sync-all', { volunteers: payload })
+      if (result.ok) {
+        const data = result.data as { synced?: number; failed?: number }
+        showMessage('success', `Synced ${data.synced ?? volunteers.length} volunteers to cloud.`)
+      } else {
+        showMessage('error', result.error || 'Failed to sync volunteers.')
+      }
+    } catch {
+      showMessage('error', 'Failed to sync volunteers.')
+    } finally {
+      setSyncing(false)
     }
   }
 
@@ -175,6 +208,47 @@ export function SettingsPage() {
               }
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Email Notifications */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="size-4" />
+            Email Notifications
+          </CardTitle>
+          <CardDescription>Send confirmation and reminder emails to volunteers.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="notifications-toggle" className="text-sm font-medium">
+                Enable Notifications
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Sync volunteer data to send automated reminders
+              </p>
+            </div>
+            <Switch
+              id="notifications-toggle"
+              checked={settings.notificationsEnabled}
+              onCheckedChange={(checked) =>
+                updateSettings({ notificationsEnabled: checked === true })
+              }
+            />
+          </div>
+          {settings.notificationsEnabled && (
+            <Button
+              onClick={syncAllVolunteers}
+              variant="outline"
+              className="w-full justify-start"
+              disabled={syncing}
+            >
+              <CloudUpload className="size-4" />
+              {syncing ? 'Syncing...' : 'Sync All Volunteers to Cloud'}
+            </Button>
+          )}
         </CardContent>
       </Card>
 

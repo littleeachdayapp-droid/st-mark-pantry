@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
+import { useSettings } from '@/contexts/SettingsContext';
+import { apiPost } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -102,6 +104,7 @@ function getVolunteersForDate(
 }
 
 export function VolunteerSchedule() {
+  const { settings } = useSettings();
   const volunteers = useLiveQuery(() => db.volunteers.toArray());
   const allSignups = useLiveQuery(() => db.volunteerSignups.toArray());
 
@@ -133,7 +136,7 @@ export function VolunteerSchedule() {
   }
 
   async function handleSignup() {
-    if (!selectedVolunteerId || !signupDate) return;
+    if (!selectedVolunteerId || !signupDate || !volunteers) return;
 
     setSaving(true);
     try {
@@ -143,12 +146,15 @@ export function VolunteerSchedule() {
         .equals([selectedVolunteerId, signupDate])
         .first();
 
+      let signupId: string;
       if (existing) {
         // Update existing record to signed-up
         await db.volunteerSignups.update(existing.id, { status: 'signed-up' });
+        signupId = existing.id;
       } else {
+        signupId = crypto.randomUUID();
         await db.volunteerSignups.add({
-          id: crypto.randomUUID(),
+          id: signupId,
           volunteerId: selectedVolunteerId,
           date: signupDate,
           dayOfWeek: signupDayOfWeek,
@@ -156,6 +162,24 @@ export function VolunteerSchedule() {
           status: 'signed-up',
           createdAt: new Date().toISOString(),
         });
+      }
+
+      // Fire-and-forget API call for email notification
+      if (settings.notificationsEnabled) {
+        const vol = volunteers.find((v) => v.id === selectedVolunteerId);
+        if (vol) {
+          apiPost('/api/signups', {
+            signupId,
+            volunteerId: vol.id,
+            firstName: vol.firstName,
+            lastName: vol.lastName,
+            email: vol.email,
+            date: signupDate,
+            dayOfWeek: signupDayOfWeek,
+            role: selectedRole || undefined,
+            recurringDays: vol.recurringDays,
+          });
+        }
       }
 
       setSignupDialogOpen(false);
@@ -183,10 +207,20 @@ export function VolunteerSchedule() {
         createdAt: new Date().toISOString(),
       });
     }
+
+    // Fire-and-forget cancellation notification
+    if (settings.notificationsEnabled) {
+      apiPost('/api/signups/cancel', { volunteerId, date, dayOfWeek });
+    }
   }
 
-  async function removeSignup(signupId: string) {
+  async function removeSignup(signupId: string, volunteerId: string, date: string, dayOfWeek: string) {
     await db.volunteerSignups.delete(signupId);
+
+    // Fire-and-forget cancellation notification
+    if (settings.notificationsEnabled) {
+      apiPost('/api/signups/cancel', { signupId, volunteerId, date, dayOfWeek });
+    }
   }
 
   // Filter volunteers for the signup dialog - exclude those already scheduled for the date
@@ -306,7 +340,7 @@ export function VolunteerSchedule() {
                               if (source === 'recurring') {
                                 excuseRecurring(volunteer.id, date, dayOfWeek);
                               } else if (signupId) {
-                                removeSignup(signupId);
+                                removeSignup(signupId, volunteer.id, date, dayOfWeek);
                               }
                             }}
                           >

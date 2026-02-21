@@ -1,9 +1,11 @@
 export interface PantrySettings {
   inventoryEnabled: boolean;
+  notificationsEnabled: boolean;
 }
 
 export const DEFAULT_SETTINGS: PantrySettings = {
   inventoryEnabled: false,
+  notificationsEnabled: false,
 };
 
 const STORAGE_KEY = 'pantry-settings';

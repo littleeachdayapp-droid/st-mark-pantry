@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '@/db/database';
+import { useSettings } from '@/contexts/SettingsContext';
+import { apiPost } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +13,7 @@ import type { PantryDay, Volunteer } from '@/types';
 export function VolunteerForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { settings } = useSettings();
   const isEdit = Boolean(id);
 
   const [loading, setLoading] = useState(isEdit);
@@ -74,6 +77,18 @@ export function VolunteerForm() {
 
       if (isEdit && id) {
         await db.volunteers.update(id, volunteerData);
+
+        // Fire-and-forget sync to Supabase
+        if (settings.notificationsEnabled && volunteerData.email) {
+          apiPost('/api/volunteers/sync', {
+            id,
+            firstName: volunteerData.firstName,
+            lastName: volunteerData.lastName,
+            email: volunteerData.email,
+            recurringDays: volunteerData.recurringDays,
+          });
+        }
+
         navigate(`/volunteers/${id}`);
       } else {
         const newVolunteer: Volunteer = {
@@ -82,6 +97,18 @@ export function VolunteerForm() {
           createdAt: now,
         };
         await db.volunteers.add(newVolunteer);
+
+        // Fire-and-forget sync to Supabase
+        if (settings.notificationsEnabled && volunteerData.email) {
+          apiPost('/api/volunteers/sync', {
+            id: newVolunteer.id,
+            firstName: volunteerData.firstName,
+            lastName: volunteerData.lastName,
+            email: volunteerData.email,
+            recurringDays: volunteerData.recurringDays,
+          });
+        }
+
         navigate(`/volunteers/${newVolunteer.id}`);
       }
     } catch {
