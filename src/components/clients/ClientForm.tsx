@@ -32,6 +32,7 @@ export function ClientForm() {
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState<Address>({ ...EMPTY_ADDRESS });
   const [notes, setNotes] = useState('');
+  const [acceptsPerishables, setAcceptsPerishables] = useState(true);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
 
   // Family size override
@@ -67,6 +68,7 @@ export function ClientForm() {
       setEmail(client.email ?? '');
       setAddress(client.address);
       setNotes(client.notes ?? '');
+      setAcceptsPerishables(client.acceptsPerishables !== false);
       setFamilyMembers(client.familyMembers);
 
       // Check if family size was manually overridden
@@ -130,6 +132,7 @@ export function ClientForm() {
         familyMembers: familyMembers.filter((m) => m.name.trim() !== ''),
         numberInFamily: effectiveFamilySize,
         notes: notes.trim() || undefined,
+        acceptsPerishables: acceptsPerishables ? undefined : false,
       };
 
       if (isEdit && id) {
@@ -250,6 +253,16 @@ export function ClientForm() {
                 />
               </div>
             </div>
+
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptsPerishables}
+                onChange={(e) => setAcceptsPerishables(e.target.checked)}
+                className="rounded border-input"
+              />
+              Can receive perishable foods
+            </label>
           </CardContent>
         </Card>
 

@@ -266,10 +266,15 @@ export function CheckInPage() {
                             </span>
                           </p>
                           {showMonthlyWarning && (
-                            <p className="flex items-center gap-1 text-xs text-warning-foreground">
+                            <span className="inline-flex items-center gap-1 rounded-md bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
                               <AlertTriangle className="size-3 shrink-0" />
-                              Already visited on {formatDate(monthlyVisitDate)}
-                            </p>
+                              Visited {formatDate(monthlyVisitDate)}
+                            </span>
+                          )}
+                          {client.acceptsPerishables === false && (
+                            <Badge variant="outline" className="border-blue-300 text-blue-700 dark:text-blue-300">
+                              No Perishables
+                            </Badge>
                           )}
                           {alreadyToday && (
                             <p className="text-xs text-muted-foreground">

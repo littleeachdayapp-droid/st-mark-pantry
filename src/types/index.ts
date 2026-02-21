@@ -21,6 +21,7 @@ export interface Client {
   familyMembers: FamilyMember[];
   numberInFamily: number;
   notes?: string;
+  acceptsPerishables?: boolean; // undefined/true = eligible, false = no perishables
   createdAt: string;
   updatedAt: string;
 }

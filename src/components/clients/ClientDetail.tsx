@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
-import { ArrowLeft, Phone, Mail, MapPin, Pencil, Trash2, Users, QrCode } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MapPin, Pencil, Trash2, Users, QrCode, AlertTriangle, Snowflake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +17,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from '@/components/ui/dialog';
-import { formatDate } from '@/utils/dateHelpers';
+import { formatDate, getTodayISO } from '@/utils/dateHelpers';
 import { ClientQRCard } from './ClientQRCard';
 
 export function ClientDetail() {
@@ -26,6 +26,9 @@ export function ClientDetail() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showQR, setShowQR] = useState(false);
+
+  const today = getTodayISO();
+  const monthStart = today.substring(0, 7) + '-01';
 
   const client = useLiveQuery(
     () => (id ? db.clients.get(id) : undefined),
@@ -42,6 +45,11 @@ export function ClientDetail() {
             .then((v) => v.sort((a, b) => b.date.localeCompare(a.date)))
         : [],
     [id]
+  );
+
+  // Find the most recent visit this month (excluding today)
+  const visitThisMonth = visits?.find(
+    (v) => v.date >= monthStart && v.date <= today && v.date !== today
   );
 
   if (client === undefined || visits === undefined) {
@@ -91,6 +99,14 @@ export function ClientDetail() {
 
   return (
     <div className="space-y-6">
+      {/* Monthly visit warning */}
+      {visitThisMonth && (
+        <div className="flex items-center gap-2 rounded-md bg-yellow-100 px-4 py-3 text-sm font-medium text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
+          <AlertTriangle className="size-4 shrink-0" />
+          Already visited this month on {formatDate(visitThisMonth.date)}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
@@ -168,6 +184,16 @@ export function ClientDetail() {
               <span>{addressParts.join(', ')}</span>
             </div>
           )}
+        </div>
+
+        <div className="mt-3 flex items-center gap-2 text-sm">
+          <Snowflake className="size-4 text-muted-foreground shrink-0" />
+          <span>
+            Perishable foods:{' '}
+            <span className={client.acceptsPerishables === false ? 'font-medium text-blue-700 dark:text-blue-300' : 'text-muted-foreground'}>
+              {client.acceptsPerishables === false ? 'No' : 'Yes'}
+            </span>
+          </span>
         </div>
 
         {client.notes && (
