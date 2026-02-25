@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
+import { syncFromCloud } from '@/lib/cloud-sync'
 import { AppShell } from '@/components/layout/AppShell'
 import { DashboardPage } from '@/components/dashboard/DashboardPage'
 import { CheckInPage } from '@/components/checkin/CheckInPage'
@@ -68,6 +69,10 @@ function LoginGate({ children }: { children: React.ReactNode }) {
 }
 
 export function App() {
+  useEffect(() => {
+    syncFromCloud().catch(() => {/* offline or API unavailable — ignore */});
+  }, []);
+
   return (
     <LoginGate>
     <Routes>
