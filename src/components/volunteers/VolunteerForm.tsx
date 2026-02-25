@@ -13,7 +13,7 @@ import type { PantryDay, Volunteer } from '@/types';
 
 const DAYS: PantryDay[] = ['Monday', 'Friday', 'Saturday'];
 const DAY_SHORT: Record<PantryDay, string> = { Monday: 'Mon', Friday: 'Fri', Saturday: 'Sat' };
-const ORDINALS = ['1st', '2nd', '3rd', '4th'] as const;
+const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th'] as const;
 
 export function VolunteerForm() {
   const { id } = useParams<{ id: string }>();
