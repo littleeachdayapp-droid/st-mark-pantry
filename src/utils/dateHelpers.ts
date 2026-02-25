@@ -192,10 +192,11 @@ export function formatSlot(slot: string): string {
 // ---- Helpers ----
 
 /**
- * Parses a 'YYYY-MM-DD' string as a local date (not UTC).
+ * Parses a 'YYYY-MM-DD' or full ISO datetime string as a local date (not UTC).
  */
 export function parseLocalDate(iso: string): Date {
-  const [year, month, day] = iso.split('-').map(Number);
+  const dateOnly = iso.includes('T') ? iso.split('T')[0] : iso;
+  const [year, month, day] = dateOnly.split('-').map(Number);
   return new Date(year, month - 1, day);
 }
 
