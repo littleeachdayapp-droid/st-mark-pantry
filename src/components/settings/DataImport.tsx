@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useCallback } from 'react';
-import * as XLSX from 'xlsx';
+import { parseExcelFile } from '@/lib/excel';
 import { db } from '@/db/database';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -153,22 +153,7 @@ async function parseFile(
   file: File
 ): Promise<{ headers: string[]; rows: Record<string, string>[] }> {
   const data = await file.arrayBuffer();
-  const workbook = XLSX.read(data, { type: 'array' });
-  const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const json = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, {
-    defval: '',
-  });
-  const headers = json.length > 0 ? Object.keys(json[0]) : [];
-  return {
-    headers,
-    rows: json.map((row) => {
-      const mapped: Record<string, string> = {};
-      for (const key of headers) {
-        mapped[key] = String(row[key] ?? '').trim();
-      }
-      return mapped;
-    }),
-  };
+  return parseExcelFile(data);
 }
 
 function autoDetectMapping(headers: string[]): ColumnMapping {

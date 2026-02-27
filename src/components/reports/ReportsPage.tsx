@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
-import * as XLSX from 'xlsx';
+import { exportToExcel, exportMultiSheetExcel } from '@/lib/excel';
 import { Download, Users, HandHeart, Calendar, Clock, UserX, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,29 +13,6 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { getTodayISO, getMonthRange, formatDate } from '@/utils/dateHelpers';
 import { PrintVisitLog } from './PrintVisitLog';
 import type { Client, Volunteer } from '@/types';
-
-// ---------------------------------------------------------------------------
-// Excel Export Helper
-// ---------------------------------------------------------------------------
-
-function exportToExcel(data: Record<string, unknown>[], filename: string, sheetName: string) {
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, sheetName);
-  XLSX.writeFile(wb, filename);
-}
-
-function exportMultiSheetExcel(
-  sheets: { name: string; data: Record<string, unknown>[] }[],
-  filename: string
-) {
-  const wb = XLSX.utils.book_new();
-  for (const sheet of sheets) {
-    const ws = XLSX.utils.json_to_sheet(sheet.data);
-    XLSX.utils.book_append_sheet(wb, ws, sheet.name);
-  }
-  XLSX.writeFile(wb, filename);
-}
 
 // ---------------------------------------------------------------------------
 // Main Component
@@ -159,7 +136,7 @@ export function ReportsPage() {
   });
 
   // --- Export handlers ---
-  const handleExportClients = () => {
+  const handleExportClients = async () => {
     if (!clients) return;
     const rows = clients.map((c) => ({
       ID: c.id,
@@ -175,10 +152,10 @@ export function ReportsPage() {
       Notes: c.notes || '',
       'Created At': c.createdAt,
     }));
-    exportToExcel(rows, `clients-${today}.xlsx`, 'Clients');
+    await exportToExcel(rows, `clients-${today}.xlsx`, 'Clients');
   };
 
-  const handleExportVisits = () => {
+  const handleExportVisits = async () => {
     if (!visits || !clients) return;
     const clientMap = new Map<string, Client>();
     for (const c of clients) {
@@ -198,10 +175,10 @@ export function ReportsPage() {
         'Checked In At': v.checkedInAt,
       };
     });
-    exportToExcel(rows, `visit-log-${today}.xlsx`, 'Visits');
+    await exportToExcel(rows, `visit-log-${today}.xlsx`, 'Visits');
   };
 
-  const handleExportVolunteers = () => {
+  const handleExportVolunteers = async () => {
     if (!volunteers || !volunteerShifts) return;
     const volunteerMap = new Map<string, Volunteer>();
     for (const v of volunteers) {
@@ -229,7 +206,7 @@ export function ReportsPage() {
         Notes: s.notes || '',
       };
     });
-    exportMultiSheetExcel(
+    await exportMultiSheetExcel(
       [
         { name: 'Volunteers', data: volunteerRows },
         { name: 'Shifts', data: shiftRows },

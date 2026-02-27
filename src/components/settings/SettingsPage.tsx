@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { Download, Upload, FileSpreadsheet, Info, Package, Bell, CloudUpload, CloudDownload } from 'lucide-react'
-import * as XLSX from 'xlsx'
 import { db } from '@/db/database'
+import { exportMultiSheetExcel } from '@/lib/excel'
 import { useSettings } from '@/contexts/SettingsContext'
 import { apiPost } from '@/lib/api'
 import { syncFromCloud } from '@/lib/cloud-sync'
@@ -171,12 +171,13 @@ export function SettingsPage() {
         'Checked In At': v.checkedInAt,
       }))
 
-      const wb = XLSX.utils.book_new()
-      const clientsSheet = XLSX.utils.json_to_sheet(clientRows)
-      const visitsSheet = XLSX.utils.json_to_sheet(visitRows)
-      XLSX.utils.book_append_sheet(wb, clientsSheet, 'Clients')
-      XLSX.utils.book_append_sheet(wb, visitsSheet, 'Visits')
-      XLSX.writeFile(wb, `pantry-export-${new Date().toISOString().split('T')[0]}.xlsx`)
+      await exportMultiSheetExcel(
+        [
+          { name: 'Clients', data: clientRows },
+          { name: 'Visits', data: visitRows },
+        ],
+        `pantry-export-${new Date().toISOString().split('T')[0]}.xlsx`
+      )
       showMessage('success', 'Excel file exported successfully.')
     } catch {
       showMessage('error', 'Failed to export Excel file.')

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
-import * as XLSX from 'xlsx';
+import { exportToExcel } from '@/lib/excel';
 import { ArrowLeft, Download, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -61,7 +61,7 @@ export function InactiveClientsPage() {
       });
   }, [clients, lastVisitMap, cutoff, today]);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (inactiveClients.length === 0) return;
     const rows = inactiveClients.map((c) => ({
       'First Name': c.firstName,
@@ -71,10 +71,7 @@ export function InactiveClientsPage() {
       'Last Visit': c.lastVisit ? formatDate(c.lastVisit) : 'Never',
       'Days Since Visit': c.daysSince ?? 'N/A',
     }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Inactive Clients');
-    XLSX.writeFile(wb, `inactive-clients-${threshold}d-${today}.xlsx`);
+    await exportToExcel(rows, `inactive-clients-${threshold}d-${today}.xlsx`, 'Inactive Clients');
   };
 
   const isLoading = clients === undefined || visits === undefined;
