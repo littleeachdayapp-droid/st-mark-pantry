@@ -100,7 +100,7 @@ export function VolunteerForm() {
           });
         }
 
-        navigate(`/volunteers/${id}`);
+        navigate('/');
       } else {
         const newVolunteer: Volunteer = {
           id: crypto.randomUUID(),

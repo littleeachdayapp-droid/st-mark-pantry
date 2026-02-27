@@ -140,7 +140,7 @@ export function ClientForm() {
           ...clientData,
           updatedAt: now,
         });
-        navigate(`/clients/${id}`);
+        navigate('/');
       } else {
         const newClient: Client = {
           id: crypto.randomUUID(),
