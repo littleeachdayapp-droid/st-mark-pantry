@@ -27,9 +27,32 @@ function LoginGate({ children }: { children: React.ReactNode }) {
 
   if (authed) return <>{children}</>
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (value.trim().toLowerCase() === PASS) {
+    const trimmed = value.trim().toLowerCase()
+
+    // Try server verification first to get API key
+    try {
+      const res = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: trimmed }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.apiKey) localStorage.setItem('pantry-api-key', data.apiKey)
+        localStorage.setItem(STORAGE_KEY, 'true')
+        setAuthed(true)
+        return
+      }
+      // Server rejected password
+      setError(true)
+      return
+    } catch {
+      // Offline — fall back to client-side check (PWA mode)
+    }
+
+    if (trimmed === PASS) {
       localStorage.setItem(STORAGE_KEY, 'true')
       setAuthed(true)
     } else {

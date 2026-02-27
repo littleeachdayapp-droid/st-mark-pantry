@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSupabase } from '../../lib/supabase.js';
 import { getResend, FROM_EMAIL } from '../../lib/resend.js';
 import { cancellationEmail } from '../../lib/emails.js';
+import { requireAuth } from '../lib/require-auth.js';
 
 interface CancelBody {
   signupId?: string;
@@ -14,6 +15,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+  if (!requireAuth(req, res)) return;
 
   try {
     const body = req.body as CancelBody;
