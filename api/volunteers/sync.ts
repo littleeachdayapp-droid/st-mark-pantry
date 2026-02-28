@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSupabase } from '../../lib/supabase.js';
-import { requireAuth } from '../lib/require-auth.js';
+import { requireAuth, isValidUUID } from '../lib/require-auth.js';
 
 interface SyncBody {
   id: string;
@@ -23,6 +23,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!id || !firstName || !lastName) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    if (!isValidUUID(id)) {
+      return res.status(400).json({ error: 'Invalid ID format' });
     }
 
     const { error } = await getSupabase().from('volunteers').upsert({

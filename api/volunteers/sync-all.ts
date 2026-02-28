@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSupabase } from '../../lib/supabase.js';
-import { requireAuth } from '../lib/require-auth.js';
+import { requireAuth, isValidUUID } from '../lib/require-auth.js';
 
 interface VolunteerData {
   id: string;
@@ -22,6 +22,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!Array.isArray(volunteers) || volunteers.length === 0) {
       return res.status(400).json({ error: 'No volunteers provided' });
+    }
+
+    const invalidIds = volunteers.filter(v => !isValidUUID(v.id));
+    if (invalidIds.length > 0) {
+      return res.status(400).json({ error: 'Invalid volunteer ID format' });
     }
 
     const now = new Date().toISOString();

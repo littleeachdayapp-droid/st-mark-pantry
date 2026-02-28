@@ -17,16 +17,8 @@ interface PublicSignupBody {
   dates: SignupDate[];
 }
 
-function corsHeaders(res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  corsHeaders(res);
-
-  // Preflight
+  // CORS preflight (headers set by vercel.json)
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
   }
