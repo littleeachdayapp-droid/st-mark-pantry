@@ -102,6 +102,8 @@ export function InactiveClientsPage() {
             key={days}
             type="button"
             onClick={() => setThreshold(days)}
+            aria-pressed={threshold === days}
+            aria-label={`Show clients inactive for ${days} days`}
             className={`rounded-full px-5 py-1.5 text-sm font-medium transition-colors ${
               threshold === days
                 ? 'bg-primary text-primary-foreground shadow-sm'

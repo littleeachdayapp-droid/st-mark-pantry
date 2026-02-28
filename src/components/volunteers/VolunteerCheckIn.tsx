@@ -128,6 +128,8 @@ export function VolunteerCheckIn() {
               key={day}
               type="button"
               onClick={() => setSelectedDay(day)}
+              aria-pressed={selectedDay === day}
+              aria-label={`Select ${day}`}
               className={`rounded-full px-5 py-1.5 text-sm font-medium transition-colors ${
                 selectedDay === day
                   ? 'bg-primary text-primary-foreground shadow-sm'
@@ -153,6 +155,7 @@ export function VolunteerCheckIn() {
             ref={searchRef}
             type="search"
             placeholder="Search volunteer by name..."
+            aria-label="Search volunteers by name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             disabled={!selectedDay}
@@ -209,6 +212,8 @@ export function VolunteerCheckIn() {
                                 key={role}
                                 type="button"
                                 onClick={() => handleRoleSelect(volunteer.id, role)}
+                                aria-pressed={selectedRole === role}
+                                aria-label={`Assign ${role} role`}
                                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                                   selectedRole === role
                                     ? 'bg-primary text-primary-foreground'

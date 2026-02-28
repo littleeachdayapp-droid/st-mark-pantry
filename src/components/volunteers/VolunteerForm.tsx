@@ -251,6 +251,7 @@ export function VolunteerForm() {
                           <input
                             type="checkbox"
                             checked={isEvery}
+                            aria-label={`Every ${day}`}
                             onChange={(e) => {
                               if (e.target.checked) {
                                 // Add "every" and remove individual ordinals for this day
@@ -282,6 +283,7 @@ export function VolunteerForm() {
                               type="checkbox"
                               checked={isEvery || recurringSlots.includes(slot)}
                               disabled={isEvery}
+                              aria-label={`${ordinal} ${day}`}
                               onChange={(e) => {
                                 if (e.target.checked) {
                                   setRecurringSlots([...recurringSlots, slot]);

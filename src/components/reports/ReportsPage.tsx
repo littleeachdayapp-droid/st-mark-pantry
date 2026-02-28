@@ -348,33 +348,47 @@ export function ReportsPage() {
               No visit data yet.
             </p>
           ) : (
-            <div className="space-y-2">
-              {monthlyData.map((m) => (
-                <div key={m.label} className="flex items-center gap-2">
-                  <span className="w-16 text-xs text-right text-muted-foreground shrink-0">
-                    {m.label}
-                  </span>
-                  <div className="flex-1 h-6 bg-muted rounded-sm overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-sm flex items-center px-2 transition-all duration-300"
-                      style={{
-                        width:
-                          maxCount > 0
-                            ? `${(m.count / maxCount) * 100}%`
-                            : '0%',
-                        minWidth: m.count > 0 ? '2rem' : 0,
-                      }}
-                    >
-                      {m.count > 0 && (
-                        <span className="text-xs text-primary-foreground font-medium">
-                          {m.count}
-                        </span>
-                      )}
+            <>
+              <div className="space-y-2" aria-hidden="true">
+                {monthlyData.map((m) => (
+                  <div key={m.label} className="flex items-center gap-2">
+                    <span className="w-16 text-xs text-right text-muted-foreground shrink-0">
+                      {m.label}
+                    </span>
+                    <div className="flex-1 h-6 bg-muted rounded-sm overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-sm flex items-center px-2 transition-all duration-300"
+                        style={{
+                          width:
+                            maxCount > 0
+                              ? `${(m.count / maxCount) * 100}%`
+                              : '0%',
+                          minWidth: m.count > 0 ? '2rem' : 0,
+                        }}
+                      >
+                        {m.count > 0 && (
+                          <span className="text-xs text-primary-foreground font-medium">
+                            {m.count}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+              {/* Screen-reader accessible data table */}
+              <table className="sr-only">
+                <caption>Visits per month, last 12 months</caption>
+                <thead>
+                  <tr><th>Month</th><th>Visits</th></tr>
+                </thead>
+                <tbody>
+                  {monthlyData.map((m) => (
+                    <tr key={m.label}><td>{m.label}</td><td>{m.count}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </CardContent>
       </Card>

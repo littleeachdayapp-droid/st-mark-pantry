@@ -211,6 +211,8 @@ export function CheckInPage() {
               key={day}
               type="button"
               onClick={() => setSelectedDay(day)}
+              aria-pressed={selectedDay === day}
+              aria-label={`Select ${day}`}
               className={`rounded-full px-5 py-1.5 text-sm font-medium transition-colors ${
                 selectedDay === day
                   ? 'bg-primary text-primary-foreground shadow-sm'
@@ -246,6 +248,7 @@ export function CheckInPage() {
             ref={searchRef}
             type="search"
             placeholder="Search by name..."
+            aria-label="Search clients by name"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             disabled={!selectedDay}

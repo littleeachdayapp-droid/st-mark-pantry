@@ -111,7 +111,7 @@ export function DashboardPage() {
       <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         <StatCard icon={Users} label="Today's Clients" value={todayClientCount} />
         <StatCard icon={HandHeart} label="Today's Volunteers" value={todayVolunteerCount} />
         <StatCard icon={Calendar} label={`${currentMonthLabel} Clients`} value={monthlyUniqueClients} />

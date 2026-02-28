@@ -12,12 +12,12 @@ export function StatCard({
   return (
     <Card className="py-4">
       <CardContent className="flex items-center gap-3 px-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-          <Icon className="size-5 text-primary" />
+        <div className="flex size-8 sm:size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+          <Icon className="size-4 sm:size-5 text-primary" />
         </div>
         <div className="min-w-0">
-          <p className="text-2xl font-bold leading-none">{value}</p>
-          <p className="text-xs text-muted-foreground mt-1">{label}</p>
+          <p className="text-xl sm:text-2xl font-bold leading-none">{value}</p>
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">{label}</p>
         </div>
       </CardContent>
     </Card>

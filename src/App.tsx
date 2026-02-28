@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { useState, useEffect, Component } from 'react'
+import { Routes, Route, Link } from 'react-router-dom'
 import { syncFromCloud } from '@/lib/cloud-sync'
 import { AppShell } from '@/components/layout/AppShell'
 import { DashboardPage } from '@/components/dashboard/DashboardPage'
@@ -16,6 +16,40 @@ import { VolunteerCalendar } from '@/components/volunteers/VolunteerCalendar'
 import { ReportsPage } from '@/components/reports/ReportsPage'
 import { InactiveClientsPage } from '@/components/reports/InactiveClientsPage'
 import { SettingsPage } from '@/components/settings/SettingsPage'
+
+class ErrorBoundary extends Component<{ children: React.ReactNode }, { error: Error | null }> {
+  state: { error: Error | null } = { error: null }
+  static getDerivedStateFromError(error: Error) { return { error } }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex min-h-svh items-center justify-center bg-muted p-4">
+          <div className="w-full max-w-sm space-y-4 rounded-xl bg-card p-6 shadow-lg text-center">
+            <h1 className="text-lg font-bold text-destructive">Something went wrong</h1>
+            <p className="text-sm text-muted-foreground">{this.state.error.message}</p>
+            <button onClick={() => { this.setState({ error: null }); window.location.href = '/' }}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+              Go Home
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+function NotFound() {
+  return (
+    <div className="mx-auto max-w-2xl py-12 text-center space-y-4">
+      <h1 className="text-2xl font-bold">Page Not Found</h1>
+      <p className="text-muted-foreground">The page you're looking for doesn't exist.</p>
+      <Link to="/" className="inline-block rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+        Go Home
+      </Link>
+    </div>
+  )
+}
 
 const PASS = 'stmark'
 const STORAGE_KEY = 'pantry-auth'
@@ -71,8 +105,11 @@ function LoginGate({ children }: { children: React.ReactNode }) {
           <h1 className="mt-2 text-lg font-bold">St. Mark Food Pantry</h1>
           <p className="text-sm text-muted-foreground">Enter password to continue</p>
         </div>
+        <label htmlFor="pantry-password" className="sr-only">Password</label>
         <input
+          id="pantry-password"
           type="password"
+          autoComplete="current-password"
           value={value}
           onChange={(e) => { setValue(e.target.value); setError(false) }}
           placeholder="Password"
@@ -97,6 +134,7 @@ export function App() {
   }, []);
 
   return (
+    <ErrorBoundary>
     <LoginGate>
     <Routes>
       <Route element={<AppShell />}>
@@ -116,8 +154,10 @@ export function App() {
         <Route path="reports" element={<ReportsPage />} />
         <Route path="reports/inactive" element={<InactiveClientsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
     </LoginGate>
+    </ErrorBoundary>
   )
 }
