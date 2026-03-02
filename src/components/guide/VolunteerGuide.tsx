@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ClipboardCheck, HandHeart, CalendarPlus, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ClipboardCheck, HandHeart, CalendarPlus, ChevronRight, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -18,15 +18,24 @@ export function VolunteerGuide() {
   return (
     <div className="mx-auto max-w-lg space-y-6 pb-24">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/">
-            <ArrowLeft className="size-4" />
-            Back
-          </Link>
+      <div className="flex items-center justify-between print:hidden">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/">
+              <ArrowLeft className="size-4" />
+              Back
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-bold">Volunteer Guide</h1>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => window.print()}>
+          <Printer className="size-4" />
+          Print
         </Button>
-        <h1 className="text-2xl font-bold">Volunteer Guide</h1>
       </div>
+      <h1 className="hidden print:block text-2xl font-bold text-center">
+        St. Mark Food Pantry — Volunteer Guide
+      </h1>
 
       <p className="text-sm text-muted-foreground">
         A quick walkthrough of common tasks in the St. Mark Food Pantry app.
@@ -63,7 +72,7 @@ export function VolunteerGuide() {
           </div>
           <Link
             to="/checkin"
-            className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            className="flex items-center gap-2 text-sm font-medium text-primary hover:underline print:hidden"
           >
             Go to Check-In <ChevronRight className="size-4" />
           </Link>
@@ -98,7 +107,7 @@ export function VolunteerGuide() {
           </div>
           <Link
             to="/volunteers/checkin"
-            className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            className="flex items-center gap-2 text-sm font-medium text-primary hover:underline print:hidden"
           >
             Go to Volunteer Check-In <ChevronRight className="size-4" />
           </Link>
@@ -139,7 +148,7 @@ export function VolunteerGuide() {
           </p>
           <Link
             to="/volunteers/schedule"
-            className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            className="flex items-center gap-2 text-sm font-medium text-primary hover:underline print:hidden"
           >
             Go to Schedule <ChevronRight className="size-4" />
           </Link>
