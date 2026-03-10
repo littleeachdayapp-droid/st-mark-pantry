@@ -250,6 +250,13 @@ class SyncEngine {
       // Remove the deletedAt field before storing locally
       const { deletedAt: _, ...cleanRecord } = record;
 
+      // Ensure array fields are never null/undefined (prevents .includes/.map crashes)
+      for (const key of ['recurringDays', 'recurringSlots', 'familyMembers']) {
+        if (key in cleanRecord && !Array.isArray(cleanRecord[key])) {
+          cleanRecord[key] = [];
+        }
+      }
+
       // Last-write-wins: only apply if remote is newer
       const local = await table.get(id);
       if (local) {

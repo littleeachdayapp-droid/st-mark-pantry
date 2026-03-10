@@ -102,7 +102,7 @@ export function toDB(
 }
 
 /** Fields that must always be arrays (never null/undefined) */
-const ARRAY_FIELDS = new Set(['recurringDays', 'recurringSlots']);
+const ARRAY_FIELDS = new Set(['recurringDays', 'recurringSlots', 'familyMembers']);
 
 /** Convert a snake_case DB row to camelCase for the client */
 export function fromDB(
