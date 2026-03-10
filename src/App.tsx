@@ -130,16 +130,20 @@ function LoginGate({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function App() {
+function SyncProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     syncEngine.sync().catch(() => {});
     syncEngine.startPolling(30_000);
     return () => syncEngine.stopPolling();
   }, []);
+  return <>{children}</>;
+}
 
+export function App() {
   return (
     <ErrorBoundary>
     <LoginGate>
+    <SyncProvider>
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
@@ -163,6 +167,7 @@ export function App() {
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
+    </SyncProvider>
     </LoginGate>
     </ErrorBoundary>
   )
