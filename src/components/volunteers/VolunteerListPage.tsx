@@ -104,9 +104,11 @@ export function VolunteerListPage() {
                       <span className="font-medium truncate">
                         {volunteer.firstName} {volunteer.lastName}
                       </span>
-                      <Badge variant="secondary" className="shrink-0">
-                        Since {formatDate(volunteer.createdAt)}
-                      </Badge>
+                      {volunteer.createdAt && (
+                        <Badge variant="secondary" className="shrink-0">
+                          Since {formatDate(volunteer.createdAt)}
+                        </Badge>
+                      )}
                       {volunteer.recurringSlots && volunteer.recurringSlots.length > 0 ? (
                         volunteer.recurringSlots.map((slot) => (
                           <Badge key={slot} variant="outline" className="shrink-0 text-xs">
