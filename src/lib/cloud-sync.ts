@@ -64,8 +64,8 @@ export async function syncFromCloud(): Promise<SyncResult> {
         lastName: sv.last_name,
         email: sv.email || undefined,
         phone: sv.phone || undefined,
-        recurringDays: sv.recurring_days as PantryDay[],
-        recurringSlots: sv.recurring_slots,
+        recurringDays: (sv.recurring_days || []) as PantryDay[],
+        recurringSlots: sv.recurring_slots || [],
       });
       idMap[sv.id] = sv.id;
       updatedVolunteers++;
@@ -100,8 +100,8 @@ export async function syncFromCloud(): Promise<SyncResult> {
       lastName: sv.last_name,
       email: sv.email || undefined,
       phone: sv.phone || undefined,
-      recurringDays: sv.recurring_days as PantryDay[],
-      recurringSlots: sv.recurring_slots,
+      recurringDays: (sv.recurring_days || []) as PantryDay[],
+      recurringSlots: sv.recurring_slots || [],
       createdAt: now,
       updatedAt: now,
     });

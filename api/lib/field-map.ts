@@ -101,6 +101,9 @@ export function toDB(
   return out;
 }
 
+/** Fields that must always be arrays (never null/undefined) */
+const ARRAY_FIELDS = new Set(['recurringDays', 'recurringSlots']);
+
 /** Convert a snake_case DB row to camelCase for the client */
 export function fromDB(
   tableName: string,
@@ -113,7 +116,12 @@ export function fromDB(
   for (const [key, value] of Object.entries(row)) {
     const camelKey = map[key];
     if (camelKey) {
-      out[camelKey] = value ?? undefined;
+      // Ensure array fields are always arrays, never null
+      if (ARRAY_FIELDS.has(camelKey)) {
+        out[camelKey] = Array.isArray(value) ? value : [];
+      } else {
+        out[camelKey] = value ?? undefined;
+      }
     }
   }
   return out;
