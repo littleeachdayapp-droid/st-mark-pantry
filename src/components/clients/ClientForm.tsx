@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, X, Save, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, X, Save, ClipboardCheck, AlertTriangle } from 'lucide-react';
 import { FamilyMemberList } from './FamilyMemberList';
 import type { Client, FamilyMember, Address } from '@/types';
 
@@ -109,9 +109,7 @@ export function ClientForm() {
     setDuplicate(match ?? null);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
+  async function saveClient(goToCheckIn: boolean) {
     if (!firstName.trim() || !lastName.trim()) return;
 
     setSaving(true);
@@ -149,11 +147,16 @@ export function ClientForm() {
           updatedAt: now,
         };
         await db.clients.add(newClient);
-        navigate(`/clients/${newClient.id}`);
+        navigate(goToCheckIn ? '/checkin' : `/clients/${newClient.id}`);
       }
     } catch {
       setSaving(false);
     }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    saveClient(false);
   }
 
   if (loading) {
@@ -382,6 +385,17 @@ export function ClientForm() {
           >
             Cancel
           </Button>
+          {!isEdit && (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={saving || !firstName.trim() || !lastName.trim()}
+              onClick={() => saveClient(true)}
+            >
+              <ClipboardCheck className="size-4" />
+              {saving ? 'Saving...' : 'Save & Check In'}
+            </Button>
+          )}
           <Button type="submit" disabled={saving || !firstName.trim() || !lastName.trim()}>
             <Save className="size-4" />
             {saving ? 'Saving...' : 'Save Client'}

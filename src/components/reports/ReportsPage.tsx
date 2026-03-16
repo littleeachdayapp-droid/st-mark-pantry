@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/database';
 import { exportToExcel, exportMultiSheetExcel } from '@/lib/excel';
-import { Download, Users, HandHeart, Calendar, Clock, UserX, ChevronRight } from 'lucide-react';
+import { Download, Users, UserPlus, HandHeart, Calendar, Clock, UserX, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,21 +39,22 @@ export function ReportsPage() {
   // --- Today's stats ---
   const todayStats = useMemo(() => {
     if (!visits || !clients || !volunteerShifts) {
-      return { clientsServed: 0, volunteersToday: 0, familyMembersServed: 0 };
+      return { clientsServed: 0, newClients: 0, volunteersToday: 0, familyMembersServed: 0 };
     }
 
     const todaysVisits = visits.filter((v) => v.date === today);
     const todaysClientIds = new Set(todaysVisits.map((v) => v.clientId));
 
-    const familyMembersServed = clients
-      .filter((c) => todaysClientIds.has(c.id))
-      .reduce((sum, c) => sum + c.numberInFamily, 0);
+    const todaysClients = clients.filter((c) => todaysClientIds.has(c.id));
+    const familyMembersServed = todaysClients.reduce((sum, c) => sum + c.numberInFamily, 0);
+    const newClients = clients.filter((c) => c.createdAt?.startsWith(today)).length;
 
     const todaysShifts = volunteerShifts.filter((s) => s.date === today);
     const uniqueVolunteerIds = new Set(todaysShifts.map((s) => s.volunteerId));
 
     return {
       clientsServed: todaysClientIds.size,
+      newClients,
       volunteersToday: uniqueVolunteerIds.size,
       familyMembersServed,
     };
@@ -233,11 +234,16 @@ export function ReportsPage() {
         <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
           Today
         </h2>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <StatCard
             icon={Users}
             label="Clients Served"
             value={todayStats.clientsServed}
+          />
+          <StatCard
+            icon={UserPlus}
+            label="New Clients"
+            value={todayStats.newClients}
           />
           <StatCard
             icon={HandHeart}

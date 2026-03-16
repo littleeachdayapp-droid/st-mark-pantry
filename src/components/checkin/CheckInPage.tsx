@@ -21,7 +21,7 @@ import { searchClients } from '@/utils/search';
 import { getTodayISO, formatDate } from '@/utils/dateHelpers';
 import TodaysList from './TodaysList';
 import { ItemsReceivedDialog } from './ItemsReceivedDialog';
-import type { Client, PantryDay, Visit } from '@/types';
+import type { Client, PantryDay, Visit, Volunteer } from '@/types';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -76,8 +76,14 @@ export function CheckInPage() {
   );
   const selectedDate = today; // always today; the day toggle is about labeling
 
-  // --- Served by (persists for the session) ---
-  const [servedBy, setServedBy] = useState('');
+  // --- Served by (persists across page loads) ---
+  const [servedBy, setServedBy] = useState(
+    () => localStorage.getItem('pantry-served-by') ?? ''
+  );
+  function updateServedBy(value: string) {
+    setServedBy(value);
+    localStorage.setItem('pantry-served-by', value);
+  }
 
   // --- Search state ---
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,6 +117,23 @@ export function CheckInPage() {
     () => db.visits.where('date').equals(selectedDate).toArray(),
     [selectedDate]
   ) ?? [];
+  const allVolunteers = useLiveQuery(() => db.volunteers.toArray()) ?? [];
+  const todaysShifts = useLiveQuery(
+    () => db.volunteerShifts.where('date').equals(today).toArray(),
+    [today]
+  ) ?? [];
+
+  // Build list of today's checked-in volunteer names for the "Served by" picker
+  const todaysVolunteerNames = useMemo(() => {
+    const volMap = new Map<string, Volunteer>();
+    for (const v of allVolunteers) volMap.set(v.id, v);
+    const ids = new Set(todaysShifts.map((s) => s.volunteerId));
+    return Array.from(ids)
+      .map((id) => volMap.get(id))
+      .filter(Boolean)
+      .sort((a, b) => a!.lastName.localeCompare(b!.lastName))
+      .map((v) => `${v!.firstName} ${v!.lastName}`);
+  }, [allVolunteers, todaysShifts]);
 
   // --- Search results ---
   const searchResults = useMemo(
@@ -235,13 +258,16 @@ export function CheckInPage() {
         )}
         <div className="flex items-center justify-center gap-2">
           <span className="text-xs text-muted-foreground">Served by:</span>
-          <input
-            type="text"
+          <select
             value={servedBy}
-            onChange={(e) => setServedBy(e.target.value)}
-            placeholder="Volunteer name"
-            className="h-7 w-40 rounded border border-input bg-transparent px-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-          />
+            onChange={(e) => updateServedBy(e.target.value)}
+            className="h-7 w-44 rounded border border-input bg-transparent px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">Select volunteer</option>
+            {todaysVolunteerNames.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
