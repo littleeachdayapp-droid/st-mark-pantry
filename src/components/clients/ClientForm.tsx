@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '@/db/database';
+import { enqueue } from '@/lib/sync-queue';
+import { getTodayISO } from '@/utils/dateHelpers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ArrowLeft, X, Save, ClipboardCheck, AlertTriangle } from 'lucide-react';
 import { FamilyMemberList } from './FamilyMemberList';
-import type { Client, FamilyMember, Address } from '@/types';
+import type { Client, FamilyMember, Address, PantryDay } from '@/types';
 
 const EMPTY_ADDRESS: Address = {
   street: '',
@@ -147,6 +149,30 @@ export function ClientForm() {
           updatedAt: now,
         };
         await db.clients.add(newClient);
+        enqueue('clients', newClient.id, 'upsert', newClient as unknown as Record<string, unknown>);
+
+        if (goToCheckIn) {
+          // Also create a visit record so they appear in today's visitors
+          const dow = new Date().getDay();
+          const dayOfWeek: PantryDay | undefined =
+            dow === 1 ? 'Monday' : dow === 5 ? 'Friday' : dow === 6 ? 'Saturday' : undefined;
+          if (dayOfWeek) {
+            const today = getTodayISO();
+            const servedBy = localStorage.getItem('pantry-served-by')?.trim() || undefined;
+            const visit = {
+              id: crypto.randomUUID(),
+              clientId: newClient.id,
+              date: today,
+              dayOfWeek,
+              servedBy,
+              checkedInAt: now,
+              updatedAt: now,
+            };
+            await db.visits.add(visit);
+            enqueue('visits', visit.id, 'upsert', visit as unknown as Record<string, unknown>);
+          }
+        }
+
         navigate(goToCheckIn ? '/checkin' : `/clients/${newClient.id}`);
       }
     } catch {
